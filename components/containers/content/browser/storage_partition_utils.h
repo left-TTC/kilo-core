@@ -28,6 +28,13 @@ COMPONENT_EXPORT(CONTAINERS_CONTENT_BROWSER)
 bool IsContainersStoragePartition(
     const content::StoragePartitionConfig& partition_config);
 
+// Checks whether a given StoragePartitionConfig partition domain and name
+// belongs to Containers. Partition domain should match
+// kContainersStoragePartitionDomain and partition name should be non-empty.
+COMPONENT_EXPORT(CONTAINERS_CONTENT_BROWSER)
+bool IsContainersStoragePartitionKey(std::string_view partition_domain,
+                                     std::string_view partition_name);
+
 // Returns the StoragePartitionConfig if it is a Containers storage partition,
 // otherwise returns std::nullopt. Used to conditionally inherit
 // StoragePartitionConfig when creating a new SiteInstance.

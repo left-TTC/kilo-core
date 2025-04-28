@@ -13,9 +13,15 @@ namespace containers {
 bool IsContainersStoragePartition(
     const content::StoragePartitionConfig& partition_config) {
   CHECK(base::FeatureList::IsEnabled(features::kContainers));
-  return partition_config.partition_domain() ==
-             kContainersStoragePartitionDomain &&
-         !partition_config.partition_name().empty();
+  return IsContainersStoragePartitionKey(partition_config.partition_domain(),
+                                         partition_config.partition_name());
+}
+
+bool IsContainersStoragePartitionKey(std::string_view partition_domain,
+                                     std::string_view partition_name) {
+  CHECK(base::FeatureList::IsEnabled(features::kContainers));
+  return partition_domain == kContainersStoragePartitionDomain &&
+         !partition_name.empty();
 }
 
 std::optional<content::StoragePartitionConfig> MaybeInheritStoragePartition(

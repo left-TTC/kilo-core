@@ -11,6 +11,8 @@ component("browser") {
   defines = [ "IS_CONTAINERS_CONTENT_BROWSER_IMPL" ]
 
   sources = [
+    "session_utils.cc",
+    "session_utils.h",
     "storage_partition_utils.cc",
     "storage_partition_utils.h",
   ]
