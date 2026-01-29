@@ -2,6 +2,9 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this file,
 // You can obtain one at https://mozilla.org/MPL/2.0/.
+
+import { ElementPickerAPI } from './element_picker_api'
+
 const NSSVG = 'http://www.w3.org/2000/svg'
 
 let pickerDiv: HTMLDivElement | null
@@ -12,23 +15,26 @@ let btnCreateDisabledText: string
 let btnShowRulesBoxText: string
 let btnHideRulesBoxText: string
 
-const api = {
-  cosmeticFilterCreate: (selector: string) => {
+class ChromiumElementPickerAPI implements ElementPickerAPI {
+  cosmeticFilterCreate(selector: string) {
     cf_worker.addSiteCosmeticFilter(selector)
-  },
-  cosmeticFilterManage: () => {
+  }
+
+  cosmeticFilterManage() {
     cf_worker.manageCustomFilters()
-  },
-  getElementPickerThemeInfo: (
+  }
+
+  getElementPickerThemeInfo(
     callback: (isDarkModeEnabled: boolean, bgcolor: number) => void,
-  ) => {
+  ) {
     cf_worker
       .getElementPickerThemeInfo()
       .then((val: { isDarkModeEnabled: boolean; bgcolor: number }) => {
         callback(val.isDarkModeEnabled, val.bgcolor)
       })
-  },
-  getLocalizedTexts: (
+  }
+
+  getLocalizedTexts(
     callback: (
       btnCreateDisabledText: string,
       btnCreateEnabledText: string,
@@ -37,7 +43,7 @@ const api = {
       btnHideRulesBoxText: string,
       btnQuitText: string,
     ) => void,
-  ) => {
+  ) {
     cf_worker
       .getLocalizedTexts()
       .then(
@@ -59,11 +65,14 @@ const api = {
           )
         },
       )
-  },
-  getPlatform: (): string => {
+  }
+
+  getPlatform() {
     return cf_worker.getPlatform()
-  },
+  }
 }
+
+const api = new ChromiumElementPickerAPI()
 
 // When the picker is activated, it eats all pointer events and takes up the
 // entire screen. All calls to document.elementFromPoint(..) will return the
