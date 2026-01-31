@@ -191,22 +191,28 @@ IN_PROC_BROWSER_TEST_F(BraveTabStripModelRenamingTabBrowserTest,
                        SettingCustomTabTitle_TabRendererDataUpdated) {
   BraveTabStripModel* tab_strip_model =
       static_cast<BraveTabStripModel*>(browser()->tab_strip_model());
-  ASSERT_EQ(TabRendererData::FromTabInModel(tab_strip_model, 0).title,
+  ASSERT_EQ(TabRendererData::FromTabInterface(tab_strip_model->GetTabAtIndex(0))
+                .title,
             u"about:blank");
   ASSERT_FALSE(
-      TabRendererData::FromTabInModel(tab_strip_model, 0).is_custom_title);
+      TabRendererData::FromTabInterface(tab_strip_model->GetTabAtIndex(0))
+          .is_custom_title);
 
   tab_strip_model->SetCustomTitleForTab(0, u"Custom Title");
-  EXPECT_EQ(TabRendererData::FromTabInModel(tab_strip_model, 0).title,
+  EXPECT_EQ(TabRendererData::FromTabInterface(tab_strip_model->GetTabAtIndex(0))
+                .title,
             u"Custom Title");
   EXPECT_TRUE(
-      TabRendererData::FromTabInModel(tab_strip_model, 0).is_custom_title);
+      TabRendererData::FromTabInterface(tab_strip_model->GetTabAtIndex(0))
+          .is_custom_title);
 
   tab_strip_model->SetCustomTitleForTab(0, std::nullopt);
-  EXPECT_EQ(TabRendererData::FromTabInModel(tab_strip_model, 0).title,
+  EXPECT_EQ(TabRendererData::FromTabInterface(tab_strip_model->GetTabAtIndex(0))
+                .title,
             u"about:blank");
   EXPECT_FALSE(
-      TabRendererData::FromTabInModel(tab_strip_model, 0).is_custom_title);
+      TabRendererData::FromTabInterface(tab_strip_model->GetTabAtIndex(0))
+          .is_custom_title);
 }
 
 IN_PROC_BROWSER_TEST_F(BraveTabStripModelRenamingTabBrowserTest,
@@ -251,17 +257,21 @@ IN_PROC_BROWSER_TEST_F(BraveTabStripModelRenamingTabBrowserTest,
   BraveTabStripModel* tab_strip_model =
       static_cast<BraveTabStripModel*>(browser()->tab_strip_model());
   ASSERT_FALSE(
-      TabRendererData::FromTabInModel(tab_strip_model, 0).is_custom_title);
+      TabRendererData::FromTabInterface(tab_strip_model->GetTabAtIndex(0))
+          .is_custom_title);
   auto* web_contents = tab_strip_model->GetWebContentsAt(0);
   ASSERT_EQ(web_contents->GetLastCommittedURL(), "about:blank");
   ASSERT_FALSE(
-      TabRendererData::FromTabInModel(tab_strip_model, 0).is_custom_title);
+      TabRendererData::FromTabInterface(tab_strip_model->GetTabAtIndex(0))
+          .is_custom_title);
 
   tab_strip_model->SetCustomTitleForTab(0, u"Custom Title");
-  ASSERT_EQ(TabRendererData::FromTabInModel(tab_strip_model, 0).title,
+  ASSERT_EQ(TabRendererData::FromTabInterface(tab_strip_model->GetTabAtIndex(0))
+                .title,
             u"Custom Title");
   ASSERT_TRUE(
-      TabRendererData::FromTabInModel(tab_strip_model, 0).is_custom_title);
+      TabRendererData::FromTabInterface(tab_strip_model->GetTabAtIndex(0))
+          .is_custom_title);
 
   // When navigating to a different origin, the custom title should be reset
   // to the default title.
@@ -273,7 +283,8 @@ IN_PROC_BROWSER_TEST_F(BraveTabStripModelRenamingTabBrowserTest,
                    .IsSameOriginWith(url::Origin::Create(target_url)));
 
   EXPECT_FALSE(
-      TabRendererData::FromTabInModel(tab_strip_model, 0).is_custom_title);
+      TabRendererData::FromTabInterface(tab_strip_model->GetTabAtIndex(0))
+          .is_custom_title);
 }
 
 IN_PROC_BROWSER_TEST_F(BraveTabStripModelRenamingTabBrowserTest,
@@ -281,17 +292,21 @@ IN_PROC_BROWSER_TEST_F(BraveTabStripModelRenamingTabBrowserTest,
   BraveTabStripModel* tab_strip_model =
       static_cast<BraveTabStripModel*>(browser()->tab_strip_model());
   ASSERT_FALSE(
-      TabRendererData::FromTabInModel(tab_strip_model, 0).is_custom_title);
+      TabRendererData::FromTabInterface(tab_strip_model->GetTabAtIndex(0))
+          .is_custom_title);
   auto* web_contents = tab_strip_model->GetWebContentsAt(0);
   ASSERT_EQ(web_contents->GetLastCommittedURL(), "about:blank");
   ASSERT_FALSE(
-      TabRendererData::FromTabInModel(tab_strip_model, 0).is_custom_title);
+      TabRendererData::FromTabInterface(tab_strip_model->GetTabAtIndex(0))
+          .is_custom_title);
 
   tab_strip_model->SetCustomTitleForTab(0, u"Custom Title");
-  ASSERT_EQ(TabRendererData::FromTabInModel(tab_strip_model, 0).title,
+  ASSERT_EQ(TabRendererData::FromTabInterface(tab_strip_model->GetTabAtIndex(0))
+                .title,
             u"Custom Title");
   ASSERT_TRUE(
-      TabRendererData::FromTabInModel(tab_strip_model, 0).is_custom_title);
+      TabRendererData::FromTabInterface(tab_strip_model->GetTabAtIndex(0))
+          .is_custom_title);
 
   // When navigating to a different origin, the custom title should be reset
   // to the default title.
@@ -300,7 +315,8 @@ IN_PROC_BROWSER_TEST_F(BraveTabStripModelRenamingTabBrowserTest,
       content::ExecJs(web_contents->GetPrimaryMainFrame(),
                       "window.location.href = '" + target_url.spec() + "';"));
   base::test::RunUntil([&]() {
-    return !TabRendererData::FromTabInModel(tab_strip_model, 0).is_custom_title;
+    return !TabRendererData::FromTabInterface(tab_strip_model->GetTabAtIndex(0))
+                .is_custom_title;
   });
 }
 
@@ -314,7 +330,8 @@ IN_PROC_BROWSER_TEST_F(BraveTabStripModelRenamingTabBrowserTest,
       content::NavigateToURL(tab_strip_model->GetWebContentsAt(0), target_url));
 
   tab_strip_model->SetCustomTitleForTab(0, u"Custom Title");
-  ASSERT_EQ(TabRendererData::FromTabInModel(tab_strip_model, 0).title,
+  ASSERT_EQ(TabRendererData::FromTabInterface(tab_strip_model->GetTabAtIndex(0))
+                .title,
             u"Custom Title");
 
   // When the tab is closed and restored.
@@ -330,6 +347,7 @@ IN_PROC_BROWSER_TEST_F(BraveTabStripModelRenamingTabBrowserTest,
       [&]() { return !tab_strip_model->GetWebContentsAt(0)->IsLoading(); });
 
   // Then the restored tab should have the custom title.
-  EXPECT_EQ(TabRendererData::FromTabInModel(tab_strip_model, 0).title,
+  EXPECT_EQ(TabRendererData::FromTabInterface(tab_strip_model->GetTabAtIndex(0))
+                .title,
             u"Custom Title");
 }
