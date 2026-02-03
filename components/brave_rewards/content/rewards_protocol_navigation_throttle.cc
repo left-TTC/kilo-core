@@ -138,7 +138,7 @@ void MaybeLoadRewardsURL(const GURL& redirect_url, WebContents* web_contents) {
           GURL(BUILDFLAG(UPHOLD_SANDBOX_OAUTH_URL))}},
         {"zebpay",
          {GURL(BUILDFLAG(ZEBPAY_PRODUCTION_OAUTH_URL)),
-          GURL(BUILDFLAG(ZEBPAY_SANDBOX_OAUTH_URL))}}};
+          GURL(BUILDFLAG(ZEBPAY_SANDBOX_OAUTH_URL)), GURL(brave::kGate3URL)}}};
 
     for (const auto& [wallet_provider, urls] : allowed_urls) {
       DCHECK(std::ranges::none_of(
