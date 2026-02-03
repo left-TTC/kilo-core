@@ -51,9 +51,7 @@ class BraveDefaultExtensionsHandler : public settings::SettingsPageUIHandler
                        const std::string& error,
                        extensions::webstore_install::Result result);
 #if BUILDFLAG(ENABLE_BRAVE_WALLET)
-#if BUILDFLAG(ENABLE_ORCHARD)
   void ResetZCashSyncState(const base::Value::List& args);
-#endif
   void ResetWallet(const base::Value::List& args);
   void ResetTransactionInfo(const base::Value::List& args);
 #endif  // BUILDFLAG(ENABLE_BRAVE_WALLET)
