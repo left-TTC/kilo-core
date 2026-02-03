@@ -132,7 +132,7 @@ void MaybeLoadRewardsURL(const GURL& redirect_url, WebContents* web_contents) {
           GURL(BUILDFLAG(BITFLYER_SANDBOX_URL)), GURL(brave::kGate3URL)}},
         {"gemini",
          {GURL(BUILDFLAG(GEMINI_PRODUCTION_OAUTH_URL)),
-          GURL(BUILDFLAG(GEMINI_SANDBOX_OAUTH_URL))}},
+          GURL(BUILDFLAG(GEMINI_SANDBOX_OAUTH_URL)), GURL(brave::kGate3URL)}},
         {"uphold",
          {GURL(BUILDFLAG(UPHOLD_PRODUCTION_OAUTH_URL)),
           GURL(BUILDFLAG(UPHOLD_SANDBOX_OAUTH_URL))}},
