@@ -52,6 +52,7 @@ class BraveTabStrip : public TabStrip {
 
  private:
   // Internal helper methods for container detection
+  bool IsTabInContainer(const Tab* tab) const;
   std::optional<std::string> GetContainerIdForTab(const Tab* tab) const;
   std::optional<containers::mojom::ContainerPtr> GetContainerInfoForTab(
       const Tab* tab) const;

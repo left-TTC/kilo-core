@@ -24,8 +24,6 @@
 #include "brave/browser/ui/views/tabs/brave_tab_container.h"
 #include "brave/browser/ui/views/tabs/brave_tab_hover_card_controller.h"
 #include "brave/browser/ui/views/tabs/vertical_tab_utils.h"
-#include "brave/components/containers/content/browser/storage_partition_utils.h"
-#include "brave/components/containers/core/browser/prefs.h"
 #include "chrome/browser/profiles/profile.h"
 #include "chrome/browser/themes/theme_service.h"
 #include "chrome/browser/themes/theme_service_factory.h"
@@ -50,6 +48,12 @@
 #include "ui/gfx/canvas.h"
 #include "ui/gfx/color_utils.h"
 #include "ui/views/layout/flex_layout.h"
+
+#if BUILDFLAG(ENABLE_CONTAINERS)
+#include "brave/components/containers/content/browser/storage_partition_utils.h"
+#include "brave/components/containers/core/browser/prefs.h"
+#include "brave/components/containers/core/common/features.h"
+#endif  // BUILDFLAG(ENABLE_CONTAINERS)
 
 BraveTabStrip::BraveTabStrip(std::unique_ptr<TabStripController> controller)
     : TabStrip(std::move(controller)) {
@@ -299,7 +303,15 @@ TabContainer* BraveTabStrip::GetTabContainerForTesting() {
 }
 
 bool BraveTabStrip::ShouldPaintTabAccent(const Tab* tab) const {
-  return GetContainerIdForTab(tab).has_value();
+#if BUILDFLAG(ENABLE_CONTAINERS)
+  if (!base::FeatureList::IsEnabled(containers::features::kContainers)) {
+    return false;
+  }
+
+  return IsTabInContainer(tab);
+#else
+  return false;
+#endif
 }
 
 std::optional<SkColor> BraveTabStrip::GetTabAccentColor(const Tab* tab) const {
@@ -323,27 +335,37 @@ ui::ImageModel BraveTabStrip::GetTabAccentIcon(const Tab* tab) const {
   return ui::ImageModel();
 }
 
-std::optional<std::string> BraveTabStrip::GetContainerIdForTab(
-    const Tab* tab) const {
+bool BraveTabStrip::IsTabInContainer(const Tab* tab) const {
   auto index = GetModelIndexOf(tab);
   if (!index) {
-    return std::nullopt;
+    return false;
   }
 
   auto* contents =
       GetBrowserWindowInterface()->GetTabStripModel()->GetWebContentsAt(
           index.value());
   if (!contents) {
-    return std::nullopt;
+    return false;
   }
 
   auto storage_partition_config =
       contents->GetSiteInstance()->GetStoragePartitionConfig();
 
-  if (!containers::IsContainersStoragePartition(storage_partition_config)) {
-    return std::nullopt;
-  }
+  return containers::IsContainersStoragePartition(storage_partition_config);
+}
 
+std::optional<std::string> BraveTabStrip::GetContainerIdForTab(
+    const Tab* tab) const {
+  auto index = GetModelIndexOf(tab);
+  CHECK(index);
+
+  auto* contents =
+      GetBrowserWindowInterface()->GetTabStripModel()->GetWebContentsAt(
+          index.value());
+  CHECK(contents);
+
+  auto storage_partition_config =
+      contents->GetSiteInstance()->GetStoragePartitionConfig();
   return storage_partition_config.partition_name();
 }
 
