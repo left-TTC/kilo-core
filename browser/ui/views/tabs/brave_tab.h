@@ -55,6 +55,19 @@ class BraveTab : public Tab, public views::TextfieldController {
   void SetData(TabRendererData data) override;
   bool IsActive() const override;
 
+  // Returns whether this tab should have an accent painted.
+  bool ShouldPaintTabAccent() const;
+
+  // Returns the accent color for this tab if it should have an accent.
+  // Returns nullopt if the tab should not have an accent or color cannot be
+  // determined.
+  std::optional<SkColor> GetTabAccentColor() const;
+
+  // Returns the accent icon for this tab if it should have an accent.
+  // Returns an empty ImageModel if the tab should not have an accent or icon
+  // cannot be determined.
+  ui::ImageModel GetTabAccentIcon() const;
+
   // views::TextfieldController:
   bool HandleKeyEvent(views::Textfield* sender,
                       const ui::KeyEvent& key_event) override;

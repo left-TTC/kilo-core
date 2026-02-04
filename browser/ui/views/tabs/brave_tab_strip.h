@@ -11,6 +11,7 @@
 
 #include "base/gtest_prod_util.h"
 #include "base/memory/weak_ptr.h"
+#include "brave/components/containers/core/mojom/containers.mojom.h"
 #include "chrome/browser/ui/views/tabs/tab_strip.h"
 
 class Tab;
@@ -43,6 +44,17 @@ class BraveTabStrip : public TabStrip {
   bool IsVerticalTabsFloating() const override;
   bool CanPaintThrobberToLayer() const override;
   bool CanCloseTabViaMiddleButtonClick() const override;
+
+  // TabSlotController:
+  bool ShouldPaintTabAccent(const Tab* tab) const override;
+  std::optional<SkColor> GetTabAccentColor(const Tab* tab) const override;
+  ui::ImageModel GetTabAccentIcon(const Tab* tab) const override;
+
+ private:
+  // Internal helper methods for container detection
+  std::optional<std::string> GetContainerIdForTab(const Tab* tab) const;
+  std::optional<containers::mojom::ContainerPtr> GetContainerInfoForTab(
+      const Tab* tab) const;
 
  private:
   FRIEND_TEST_ALL_PREFIXES(VerticalTabStripBrowserTest, ScrollBarMode);

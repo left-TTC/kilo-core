@@ -24,6 +24,8 @@
 #include "brave/browser/ui/views/tabs/brave_tab_container.h"
 #include "brave/browser/ui/views/tabs/brave_tab_hover_card_controller.h"
 #include "brave/browser/ui/views/tabs/vertical_tab_utils.h"
+#include "brave/components/containers/content/browser/storage_partition_utils.h"
+#include "brave/components/containers/core/browser/prefs.h"
 #include "chrome/browser/profiles/profile.h"
 #include "chrome/browser/themes/theme_service.h"
 #include "chrome/browser/themes/theme_service_factory.h"
@@ -39,8 +41,11 @@
 #include "chrome/browser/ui/views/tabs/tab_strip_observer.h"
 #include "components/tab_groups/tab_group_id.h"
 #include "components/tabs/public/tab_group.h"
+#include "content/public/browser/site_instance.h"
+#include "content/public/browser/web_contents.h"
 #include "third_party/skia/include/core/SkColor.h"
 #include "ui/base/metadata/metadata_impl_macros.h"
+#include "ui/base/models/image_model.h"
 #include "ui/compositor/layer.h"
 #include "ui/gfx/canvas.h"
 #include "ui/gfx/color_utils.h"
@@ -291,6 +296,82 @@ void BraveTabStrip::OnAlwaysHideCloseButtonPrefChanged() {
 
 TabContainer* BraveTabStrip::GetTabContainerForTesting() {
   return &tab_container_.get();  // IN-TEST
+}
+
+bool BraveTabStrip::ShouldPaintTabAccent(const Tab* tab) const {
+  return GetContainerIdForTab(tab).has_value();
+}
+
+std::optional<SkColor> BraveTabStrip::GetTabAccentColor(const Tab* tab) const {
+  auto container_info = GetContainerInfoForTab(tab);
+  if (!container_info.has_value() || !container_info.value()) {
+    return std::nullopt;
+  }
+  return container_info.value()->background_color;
+}
+
+ui::ImageModel BraveTabStrip::GetTabAccentIcon(const Tab* tab) const {
+  auto container_info = GetContainerInfoForTab(tab);
+  if (!container_info.has_value() || !container_info.value()) {
+    return ui::ImageModel();
+  }
+
+  // TODO: Convert container icon enum to ImageModel
+  // For now, return empty ImageModel
+  // This will need to map containers::mojom::Icon enum values to appropriate
+  // vector icons or image resources
+  return ui::ImageModel();
+}
+
+std::optional<std::string> BraveTabStrip::GetContainerIdForTab(
+    const Tab* tab) const {
+  auto index = GetModelIndexOf(tab);
+  if (!index) {
+    return std::nullopt;
+  }
+
+  auto* contents =
+      GetBrowserWindowInterface()->GetTabStripModel()->GetWebContentsAt(
+          index.value());
+  if (!contents) {
+    return std::nullopt;
+  }
+
+  auto storage_partition_config =
+      contents->GetSiteInstance()->GetStoragePartitionConfig();
+
+  if (!containers::IsContainersStoragePartition(storage_partition_config)) {
+    return std::nullopt;
+  }
+
+  return storage_partition_config.partition_name();
+}
+
+std::optional<containers::mojom::ContainerPtr>
+BraveTabStrip::GetContainerInfoForTab(const Tab* tab) const {
+  auto container_id = GetContainerIdForTab(tab);
+  if (!container_id.has_value()) {
+    return std::nullopt;
+  }
+
+  auto* profile = GetBrowserWindowInterface()->GetProfile();
+  if (!profile) {
+    return std::nullopt;
+  }
+
+  auto* prefs = profile->GetPrefs();
+  if (!prefs) {
+    return std::nullopt;
+  }
+
+  auto containers = containers::GetContainersFromPrefs(*prefs);
+  for (auto& container : containers) {
+    if (container && container->id == container_id.value()) {
+      return std::move(container);
+    }
+  }
+
+  return std::nullopt;
 }
 
 BEGIN_METADATA(BraveTabStrip)

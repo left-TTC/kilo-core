@@ -329,6 +329,18 @@ bool BraveTab::IsActive() const {
   return controller_->IsActiveTab(this);
 }
 
+bool BraveTab::ShouldPaintTabAccent() const {
+  return controller_->ShouldPaintTabAccent(this);
+}
+
+std::optional<SkColor> BraveTab::GetTabAccentColor() const {
+  return controller_->GetTabAccentColor(this);
+}
+
+ui::ImageModel BraveTab::GetTabAccentIcon() const {
+  return controller_->GetTabAccentIcon(this);
+}
+
 bool BraveTab::HandleKeyEvent(views::Textfield* sender,
                               const ui::KeyEvent& key_event) {
   if (key_event.type() != ui::EventType::kKeyPressed) {
