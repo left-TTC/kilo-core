@@ -12,7 +12,6 @@
 
 #include "base/functional/callback.h"
 #include "brave/components/brave_wallet/common/brave_wallet.mojom-forward.h"
-#include "url/origin.h"
 
 namespace brave_wallet {
 
@@ -35,7 +34,6 @@ class BraveWalletProviderDelegate {
   virtual void WalletInteractionDetected() = 0;
   virtual void ShowWalletOnboarding() = 0;
   virtual void ShowAccountCreation(mojom::CoinType type) = 0;
-  virtual url::Origin GetOrigin() const = 0;
   virtual void RequestPermissions(mojom::CoinType type,
                                   const std::vector<std::string>& accounts,
                                   RequestPermissionsCallback) = 0;

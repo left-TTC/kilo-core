@@ -53,7 +53,6 @@ class MockBraveWalletProviderDelegate : public BraveWalletProviderDelegate {
   MOCK_METHOD0(WalletInteractionDetected, void());
   MOCK_METHOD0(ShowWalletOnboarding, void());
   MOCK_METHOD1(ShowAccountCreation, void(mojom::CoinType type));
-  MOCK_CONST_METHOD0(GetOrigin, url::Origin());
   MOCK_METHOD3(RequestPermissions,
                void(mojom::CoinType type,
                     const std::vector<std::string>& accounts,
@@ -90,7 +89,8 @@ class CardanoProviderImplUnitTest : public testing::Test {
               std::make_unique<
                   testing::NiceMock<MockBraveWalletProviderDelegate>>();
           return result;
-        }));
+        }),
+        url::Origin());
   }
 
   void CreateWallet() {

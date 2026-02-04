@@ -29,7 +29,6 @@ class BraveWalletProviderDelegateBridge
   bool IsTabVisible() override;
   void ShowPanel() override;
   void WalletInteractionDetected() override;
-  url::Origin GetOrigin() const override;
   void ShowWalletOnboarding() override;
   void ShowWalletBackup() override;
   void UnlockWallet() override;

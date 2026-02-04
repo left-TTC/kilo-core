@@ -68,7 +68,6 @@ class MockBraveWalletProviderDelegate : public BraveWalletProviderDelegate {
   MOCK_METHOD0(WalletInteractionDetected, void());
   MOCK_METHOD0(ShowWalletOnboarding, void());
   MOCK_METHOD1(ShowAccountCreation, void(mojom::CoinType type));
-  MOCK_CONST_METHOD0(GetOrigin, url::Origin());
   MOCK_METHOD3(RequestPermissions,
                void(mojom::CoinType type,
                     const std::vector<std::string>& accounts,
@@ -104,14 +103,12 @@ class CardanoApiImplTest : public testing::Test {
         &prefs_, &local_state_);
     auto delegate =
         std::make_unique<testing::NiceMock<MockBraveWalletProviderDelegate>>();
-    ON_CALL(*delegate, GetOrigin).WillByDefault([&]() {
-      return url::Origin::Create(GURL("https://brave.com"));
-    });
     provider_ = std::make_unique<CardanoApiImpl>(
         *brave_wallet_service_, std::move(delegate),
         MakeIndexBasedAccountId(mojom::CoinType::ADA,
                                 mojom::KeyringId::kCardanoMainnet,
-                                mojom::AccountKind::kDerived, 0));
+                                mojom::AccountKind::kDerived, 0),
+        url::Origin::Create(GURL("https://brave.com")));
     cardano_test_rpc_server_ = std::make_unique<CardanoTestRpcServer>(
         *(brave_wallet_service_->GetCardanoWalletService()));
   }

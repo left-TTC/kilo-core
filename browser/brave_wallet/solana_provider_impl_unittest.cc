@@ -142,11 +142,16 @@ class SolanaProviderImplUnitTest : public testing::Test {
     auto* host_content_settings_map =
         HostContentSettingsMapFactory::GetForProfile(browser_context());
     ASSERT_TRUE(host_content_settings_map);
+    url::Origin origin =
+        web_contents()->GetPrimaryMainFrame()
+            ? web_contents()->GetPrimaryMainFrame()->GetLastCommittedOrigin()
+            : url::Origin();
     provider_ = std::make_unique<SolanaProviderImpl>(
         *host_content_settings_map, brave_wallet_service_.get(),
         std::make_unique<brave_wallet::BraveWalletProviderDelegateImpl>(
             web_contents(),
-            web_contents()->GetPrimaryMainFrame()->GetGlobalId()));
+            web_contents()->GetPrimaryMainFrame()->GetGlobalId()),
+        origin);
     observer_ = std::make_unique<MockEventsListener>();
     provider_->Init(observer_->GetReceiver());
   }

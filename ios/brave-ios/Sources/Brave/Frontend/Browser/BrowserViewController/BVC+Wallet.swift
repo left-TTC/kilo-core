@@ -235,7 +235,7 @@ extension TabBrowserData: BraveWalletProviderDelegate {
     tab.miscDelegate?.showWalletNotification(tab, origin: origin)
   }
 
-  func getOrigin() -> URLOrigin {
+  private func tabOrigin() -> URLOrigin {
     guard let origin = tab?.visibleURL?.origin else {
       // A nil url is possible if multiple tabs are restored but one or more
       // of the tabs is not opened yet (loaded the url). When a new chain is
@@ -259,7 +259,7 @@ extension TabBrowserData: BraveWalletProviderDelegate {
     guard let tab else { return }
     Task { @MainActor in
       let permissionRequestManager = WalletProviderPermissionRequestsManager.shared
-      let origin = getOrigin()
+      let origin = tabOrigin()
 
       if permissionRequestManager.hasPendingRequest(for: origin, coinType: coinType) {
         completion(.requestInProgress, nil)
@@ -412,7 +412,7 @@ extension TabBrowserData: BraveWalletProviderDelegate {
       return
     }
     Task { @MainActor in
-      let origin = getOrigin()
+      let origin = tabOrigin()
 
       // check if we receive account creation request without a wallet setup
       let isWalletCreated = await keyringService.isWalletCreated()

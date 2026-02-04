@@ -234,12 +234,17 @@ class EthereumProviderImplUnitTest : public testing::Test {
                 ->BuildServiceInstanceForBrowserContext(browser_context())
                 .release())));
 
+    url::Origin origin =
+        web_contents()->GetPrimaryMainFrame()
+            ? web_contents()->GetPrimaryMainFrame()->GetLastCommittedOrigin()
+            : url::Origin();
     provider_ = std::make_unique<EthereumProviderImpl>(
         host_content_settings_map(), brave_wallet_service_.get(),
         std::make_unique<brave_wallet::BraveWalletProviderDelegateImpl>(
             web_contents(),
             web_contents()->GetPrimaryMainFrame()->GetGlobalId()),
-        prefs());
+        prefs(),
+        origin);
 
     observer_ = std::make_unique<TestEventsListener>();
     provider_->Init(observer_->GetReceiver());
@@ -948,7 +953,8 @@ TEST_F(EthereumProviderImplUnitTest, ValidateBrokenPayloads) {
 TEST_F(EthereumProviderImplUnitTest, EmptyDelegate) {
   EthereumProviderImpl provider_impl(host_content_settings_map(),
                                      brave_wallet_service_.get(), nullptr,
-                                     prefs());
+                                     prefs(),
+                                     url::Origin());
   ValidateErrorCode(&provider_impl,
                     R"({"params": [{
         "chainId": "0x111",

@@ -66,11 +66,6 @@ BraveWalletProviderDelegateImpl::BraveWalletProviderDelegateImpl(
 
 BraveWalletProviderDelegateImpl::~BraveWalletProviderDelegateImpl() = default;
 
-url::Origin BraveWalletProviderDelegateImpl::GetOrigin() const {
-  auto* rfh = content::RenderFrameHost::FromID(host_id_);
-  return rfh ? rfh->GetLastCommittedOrigin() : url::Origin();
-}
-
 bool BraveWalletProviderDelegateImpl::IsTabVisible() {
   CHECK(web_contents());
   return web_contents()->GetVisibility() == content::Visibility::VISIBLE;

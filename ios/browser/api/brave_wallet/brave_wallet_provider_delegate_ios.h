@@ -9,8 +9,6 @@
 #import <Foundation/Foundation.h>
 #import "brave_wallet.mojom.objc.h"
 
-@class URLOriginIOS;
-
 NS_ASSUME_NONNULL_BEGIN
 
 typedef void (^RequestPermissionsCallback)(
@@ -21,7 +19,6 @@ OBJC_EXPORT
 @protocol BraveWalletProviderDelegate
 - (bool)isTabVisible;
 - (void)showPanel;
-- (URLOriginIOS*)getOrigin;
 - (void)walletInteractionDetected;
 - (void)showWalletOnboarding;
 - (void)showWalletBackup;

@@ -45,7 +45,6 @@ class BraveWalletProviderDelegateImpl : public BraveWalletProviderDelegate,
   void WalletInteractionDetected() override;
   void ShowWalletOnboarding() override;
   void ShowAccountCreation(mojom::CoinType type) override;
-  url::Origin GetOrigin() const override;
   std::optional<std::vector<std::string>> GetAllowedAccounts(
       mojom::CoinType type,
       const std::vector<std::string>& accounts) override;
