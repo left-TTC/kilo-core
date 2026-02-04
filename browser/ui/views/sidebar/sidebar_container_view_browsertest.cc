@@ -5,10 +5,13 @@
 
 #include "brave/browser/ui/views/sidebar/sidebar_container_view.h"
 
+#include "base/test/scoped_feature_list.h"
+#include "brave/browser/ui/sidebar/features.h"
 #include "brave/browser/ui/sidebar/sidebar_controller.h"
 #include "brave/browser/ui/sidebar/sidebar_service_factory.h"
 #include "brave/browser/ui/views/frame/brave_browser_view.h"
 #include "brave/browser/ui/views/sidebar/sidebar_button_view.h"
+#include "brave/browser/ui/views/sidebar/sidebar_container_view_new.h"
 #include "brave/browser/ui/views/toolbar/brave_toolbar_view.h"
 #include "brave/browser/ui/views/toolbar/side_panel_button.h"
 #include "brave/components/constants/pref_names.h"
@@ -91,4 +94,27 @@ IN_PROC_BROWSER_TEST_F(SidebarContainerViewBrowserTest,
       sidebar::SidebarItem::BuiltInItemType::kReadingList, true));
   EXPECT_EQ(1u, GetService()->items().size());
   EXPECT_TRUE(toolbar_button()->GetVisible());
+}
+
+class SidebarContainerViewV2BrowserTest : public InProcessBrowserTest {
+ public:
+  SidebarContainerViewV2BrowserTest() {
+    scoped_features_.InitAndEnableFeature(sidebar::features::kSidebarV2);
+  }
+
+  views::View* sidebar() {
+    auto* controller = browser()->GetFeatures().sidebar_controller();
+    return static_cast<views::View*>(controller->sidebar());
+  }
+
+ private:
+  base::test::ScopedFeatureList scoped_features_;
+};
+
+// Test that browser starts without crashing when kSidebarV2 is enabled
+IN_PROC_BROWSER_TEST_F(SidebarContainerViewV2BrowserTest,
+                       BrowserStartsWithV2Enabled) {
+  // Verify browser started successfully with V2 implementation
+  EXPECT_TRUE(sidebar());
+  EXPECT_TRUE(views::IsViewClass<SidebarContainerViewNew>(sidebar()));
 }

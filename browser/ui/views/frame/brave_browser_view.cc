@@ -25,6 +25,7 @@
 #include "brave/browser/ui/commands/accelerator_service_factory.h"
 #include "brave/browser/ui/page_action/brave_page_action_icon_type.h"
 #include "brave/browser/ui/page_info/features.h"
+#include "brave/browser/ui/sidebar/features.h"
 #include "brave/browser/ui/sidebar/sidebar_controller.h"
 #include "brave/browser/ui/sidebar/sidebar_utils.h"
 #include "brave/browser/ui/sidebar/sidebar_web_panel_controller.h"
@@ -41,6 +42,7 @@
 #include "brave/browser/ui/views/location_bar/brave_location_bar_view.h"
 #include "brave/browser/ui/views/omnibox/brave_omnibox_view_views.h"
 #include "brave/browser/ui/views/sidebar/sidebar_container_view.h"
+#include "brave/browser/ui/views/sidebar/sidebar_container_view_new.h"
 #include "brave/browser/ui/views/tabs/vertical_tab_utils.h"
 #include "brave/browser/ui/views/toolbar/bookmark_button.h"
 #include "brave/browser/ui/views/toolbar/brave_toolbar_view.h"
@@ -349,14 +351,20 @@ BraveBrowserView::BraveBrowserView(Browser* browser) : BrowserView(browser) {
   // Only normal window (tabbed) should have sidebar.
   const bool can_have_sidebar = sidebar::CanUseSidebar(browser_);
   if (can_have_sidebar) {
-    // Wrap chromium side panel with our sidebar container
-    auto original_side_panel =
-        RemoveChildViewT(contents_height_side_panel_.get());
-    sidebar_container_view_ =
-        AddChildView(std::make_unique<SidebarContainerView>(
-            browser_, SidePanelCoordinator::From(browser_),
-            std::move(original_side_panel)));
-    contents_height_side_panel_ = sidebar_container_view_->side_panel();
+    if (base::FeatureList::IsEnabled(sidebar::features::kSidebarV2)) {
+      // V2: Don't wrap panel - let upstream manage it
+      sidebar_container_view_new_ =
+          AddChildView(std::make_unique<SidebarContainerViewNew>(browser_));
+    } else {
+      // V1: Wrap chromium side panel with our sidebar container
+      auto original_side_panel =
+          RemoveChildViewT(contents_height_side_panel_.get());
+      sidebar_container_view_ =
+          AddChildView(std::make_unique<SidebarContainerView>(
+              browser_, SidePanelCoordinator::From(browser_),
+              std::move(original_side_panel)));
+      contents_height_side_panel_ = sidebar_container_view_->side_panel();
+    }
 
     if (IsBraveWebViewRoundedCornersEnabled()) {
       sidebar_separator_view_ =
