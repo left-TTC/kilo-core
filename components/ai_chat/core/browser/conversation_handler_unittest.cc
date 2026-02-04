@@ -5655,9 +5655,13 @@ TEST_F(ConversationHandlerUnitTest,
                 sources.push_back(mojom::WebSource::New(
                     "Weather.com", GURL("https://weather.com"),
                     GURL("https://imgs.search.brave.com/weather.ico")));
+                std::vector<std::string> rich_results;
+                rich_results.push_back(
+                    R"({"type":"infobox","title":"Weather Info"})");
                 output.push_back(mojom::ContentBlock::NewWebSourcesContentBlock(
-                    mojom::WebSourcesContentBlock::New(std::move(sources),
-                                                       "weather")));
+                    mojom::WebSourcesContentBlock::New(
+                        std::move(sources), "weather",
+                        std::move(rich_results))));
                 callback.Run(EngineConsumer::GenerationResultData(
                     mojom::ConversationEntryEvent::NewToolUseEvent(
                         mojom::ToolUseEvent::New("", "tool_id_1", "",
@@ -5745,8 +5749,9 @@ TEST_F(ConversationHandlerUnitTest,
                     "Source 2", GURL("https://source2.com"),
                     GURL("https://imgs.search.brave.com/s2.ico")));
                 output.push_back(mojom::ContentBlock::NewWebSourcesContentBlock(
-                    mojom::WebSourcesContentBlock::New(std::move(sources),
-                                                       "test query")));
+                    mojom::WebSourcesContentBlock::New(
+                        std::move(sources), "test query",
+                        std::vector<std::string>{})));
                 callback.Run(EngineConsumer::GenerationResultData(
                     mojom::ConversationEntryEvent::NewToolUseEvent(
                         mojom::ToolUseEvent::New("", "tool_id_1", "",
@@ -5922,8 +5927,9 @@ TEST_F(ConversationHandlerUnitTest,
                     "Source", GURL("https://source.com"),
                     GURL("https://imgs.search.brave.com/s.ico")));
                 output.push_back(mojom::ContentBlock::NewWebSourcesContentBlock(
-                    mojom::WebSourcesContentBlock::New(std::move(sources),
-                                                       "test")));
+                    mojom::WebSourcesContentBlock::New(
+                        std::move(sources), "test",
+                        std::vector<std::string>{})));
                 callback.Run(EngineConsumer::GenerationResultData(
                     mojom::ConversationEntryEvent::NewToolUseEvent(
                         mojom::ToolUseEvent::New("", "tool_id_1", "",
@@ -6086,8 +6092,9 @@ TEST_F(ConversationHandlerUnitTest,
                     "Weather Site", GURL("https://weather.com"),
                     GURL("https://imgs.search.brave.com/w.ico")));
                 output.push_back(mojom::ContentBlock::NewWebSourcesContentBlock(
-                    mojom::WebSourcesContentBlock::New(std::move(sources),
-                                                       "NYC weather")));
+                    mojom::WebSourcesContentBlock::New(
+                        std::move(sources), "NYC weather",
+                        std::vector<std::string>{})));
                 callback.Run(EngineConsumer::GenerationResultData(
                     mojom::ConversationEntryEvent::NewToolUseEvent(
                         mojom::ToolUseEvent::New("", "tool_id_1", "",
