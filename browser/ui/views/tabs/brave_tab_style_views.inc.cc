@@ -88,7 +88,9 @@ class BraveVerticalTabStyle : public TabStyleViewsImpl {
 
   // Paints the container accent (border, left stripe, and icon) for tabs in
   // special mode, such as Containers.
-  void PaintTabAccent(gfx::Canvas* canvas) const;
+  void PaintTabAccentBackground(gfx::Canvas* canvas) const;
+  void PaintTabAccentBorder(gfx::Canvas* canvas) const;
+  void PaintTabAccentIcon(gfx::Canvas* canvas) const;
 
   // Insets the bounds if needed. This is called for the |bounds| returned by
   // ScaleAndAlignBounds() to inset the bounds for Tab Accent icon area.
@@ -385,6 +387,13 @@ int BraveVerticalTabStyle::GetStrokeThickness(
 }
 
 void BraveVerticalTabStyle::PaintTab(gfx::Canvas* canvas) const {
+  const auto* brave_tab = static_cast<const BraveTab*>(tab());
+  CHECK(brave_tab);
+  const bool should_paint_tab_accent = brave_tab->ShouldPaintTabAccent();
+  if (should_paint_tab_accent) {
+    PaintTabAccentBackground(canvas);
+  }
+
   if (ShouldShowVerticalTabs()) {
     // For vertical tabs, bypass the upstream logic to paint theme backgrounds,
     // as this can cause crashes due to the vertical tabstrip living in a
@@ -395,7 +404,8 @@ void BraveVerticalTabStyle::PaintTab(gfx::Canvas* canvas) const {
     TabStyleViewsImpl::PaintTab(canvas);
   }
 
-  if (!HorizontalTabsUpdateEnabled() && !ShouldShowVerticalTabs()) {
+  if (!HorizontalTabsUpdateEnabled() && !ShouldShowVerticalTabs() &&
+      !should_paint_tab_accent) {
     return;
   }
 
@@ -411,11 +421,12 @@ void BraveVerticalTabStyle::PaintTab(gfx::Canvas* canvas) const {
       color_id = kColorBraveVerticalTabSeparator;
     }
 
-    SkPath stroke_path = GetPath(TabStyle::PathType::kBorder,
-                                 canvas->image_scale(), /*flags=*/{});
-
     gfx::ScopedCanvas scoped_canvas(canvas);
     float scale = canvas->UndoDeviceScaleFactor();
+
+    SkPath stroke_path =
+        GetPath(TabStyle::PathType::kBorder, scale, /*flags=*/{});
+
     cc::PaintFlags flags;
     flags.setAntiAlias(true);
     flags.setColor(widget->GetColorProvider()->GetColor(color_id));
@@ -425,14 +436,14 @@ void BraveVerticalTabStyle::PaintTab(gfx::Canvas* canvas) const {
   }
 
   // Paint tab accent if needed.
-  const auto* brave_tab = static_cast<const BraveTab*>(tab());
-  CHECK(brave_tab);
-  if (brave_tab->ShouldPaintTabAccent()) {
-    PaintTabAccent(canvas);
+  if (should_paint_tab_accent) {
+    PaintTabAccentBorder(canvas);
+    PaintTabAccentIcon(canvas);
   }
 }
 
-void BraveVerticalTabStyle::PaintTabAccent(gfx::Canvas* canvas) const {
+void BraveVerticalTabStyle::PaintTabAccentBackground(
+    gfx::Canvas* canvas) const {
   const auto* brave_tab = static_cast<const BraveTab*>(tab());
   CHECK(brave_tab);
 
@@ -444,48 +455,54 @@ void BraveVerticalTabStyle::PaintTabAccent(gfx::Canvas* canvas) const {
   gfx::ScopedCanvas scoped_canvas(canvas);
   float scale = canvas->UndoDeviceScaleFactor();
 
-  const gfx::Rect tab_bounds = tab()->GetLocalBounds();
-  const int icon_area_width = kTabAccentIconAreaWidth;
-
   // Paint thin border around the entire tab
-  SkPath border_path = GetPath(TabStyle::PathType::kFill, canvas->image_scale(),
+  SkPath border_path = GetPath(TabStyle::PathType::kFill, scale,
                                /*flags=*/{}, /*postprocess_bounds=*/false);
   cc::PaintFlags border_flags;
   border_flags.setAntiAlias(true);
   border_flags.setColor(accent_color.value());
-  border_flags.setStyle(cc::PaintFlags::kStroke_Style);
+  border_flags.setStyle(cc::PaintFlags::kFill_Style);
   border_flags.setStrokeWidth(1 * scale);
   canvas->DrawPath(border_path, border_flags);
+}
 
-  // Paint left accent stripe using border path shape
-  // Create a path that extends the border leftward by icon_area_width,
-  // following the exact border shape. We'll use the fill path extended leftward
-  // and clip it to the stripe area to get the correct shape.
-  SkPath fill_path = GetPath(TabStyle::PathType::kFill, canvas->image_scale(),
-                             /*flags=*/{}, /*postprocess_bounds=*/false);
+void BraveVerticalTabStyle::PaintTabAccentBorder(gfx::Canvas* canvas) const {
+  const auto* brave_tab = static_cast<const BraveTab*>(tab());
+  CHECK(brave_tab);
 
-  // Extend the fill path leftward by icon_area_width to create the stripe shape
-  SkMatrix left_extend_matrix;
-  left_extend_matrix.setTranslate(-icon_area_width * scale, 0);
-  SkPath extended_fill = fill_path;
-  extended_fill = extended_fill.makeTransform(left_extend_matrix);
+  auto accent_color = brave_tab->GetTabAccentColor();
+  if (!accent_color.has_value()) {
+    return;
+  }
 
-  // Draw the stripe using the extended fill path, which follows the border
-  // shape
-  cc::PaintFlags stripe_flags;
-  stripe_flags.setAntiAlias(true);
-  stripe_flags.setColor(accent_color.value());
-  stripe_flags.setStyle(cc::PaintFlags::kFill_Style);
+  gfx::ScopedCanvas scoped_canvas(canvas);
+  float scale = canvas->UndoDeviceScaleFactor();
 
-  canvas->Save();
-  canvas->ClipRect(
-      gfx::Rect(0, 0, icon_area_width * scale, tab_bounds.height() * scale));
-  canvas->DrawPath(extended_fill, stripe_flags);
-  canvas->Restore();
+  SkPath border_path = GetPath(TabStyle::PathType::kBorder, scale,
+                               /*flags=*/{}, /*postprocess_bounds=*/false);
 
-  // TODO: Paint container icon in the stripe
-  // Icon rendering will need to convert containers::mojom::Icon enum to
-  // actual icon image, which may require additional implementation
+  cc::PaintFlags border_flags;
+  border_flags.setAntiAlias(true);
+  border_flags.setColor(accent_color.value());
+  border_flags.setStyle(cc::PaintFlags::kStroke_Style);
+
+  canvas->DrawPath(border_path, border_flags);
+}
+
+void BraveVerticalTabStyle::PaintTabAccentIcon(gfx::Canvas* canvas) const {
+  const auto* brave_tab = static_cast<const BraveTab*>(tab());
+  CHECK(brave_tab);
+
+  auto accent_icon = brave_tab->GetTabAccentIcon();
+  if (accent_icon.IsEmpty()) {
+    return;
+  }
+
+  gfx::ScopedCanvas scoped_canvas(canvas);
+  float scale = canvas->UndoDeviceScaleFactor();
+
+  canvas->DrawImageInt(accent_icon.Rasterize(tab()->GetColorProvider()),
+                       4 * scale, 4 * scale);
 }
 
 bool BraveVerticalTabStyle::ShouldShowVerticalTabs() const {
@@ -588,8 +605,8 @@ std::optional<SkColor> BraveVerticalTabStyle::GetTargetTabBackgroundColor(
   }
 
   if (selection_state == TabStyle::TabSelectionState::kSelected) {
-    // Use the same color if the tab is selected via multiselection. Fallback on
-    // upstream code.
+    // Use the same color if the tab is selected via multiselection. Fallback
+    // on upstream code.
     return std::nullopt;
   }
 
