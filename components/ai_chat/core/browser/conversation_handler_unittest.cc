@@ -5621,4 +5621,511 @@ TEST_F(ConversationHandlerUnitTest, StopTask) {
                    ->output.has_value());
 }
 
+TEST_F(ConversationHandlerUnitTest,
+       UpdateOrCreateLastAssistantEntry_ServerToolResult) {
+  // Test that server tool results (with output) update the existing tool event.
+  conversation_handler_->associated_content_manager()->ClearContent();
+  MockEngineConsumer* engine = static_cast<MockEngineConsumer*>(
+      conversation_handler_->GetEngineForTesting());
+
+  testing::NiceMock<MockUntrustedConversationHandlerClient> untrusted_client(
+      conversation_handler_.get());
+
+  base::RunLoop run_loop;
+
+  // Engine returns tool use request followed by tool result from server
+  EXPECT_CALL(*engine, GenerateAssistantResponse)
+      .WillOnce(testing::DoAll(
+          testing::WithArg<6>(
+              [](EngineConsumer::GenerationDataCallback callback) {
+                // First: tool request (with tool_name)
+                callback.Run(EngineConsumer::GenerationResultData(
+                    mojom::ConversationEntryEvent::NewToolUseEvent(
+                        mojom::ToolUseEvent::New("brave_web_search",
+                                                 "tool_id_1",
+                                                 "{\"query\":\"weather\"}",
+                                                 std::nullopt, nullptr, false)),
+                    std::nullopt));
+              }),
+          testing::WithArg<6>(
+              [](EngineConsumer::GenerationDataCallback callback) {
+                // Second: tool result (empty tool_name, has output)
+                std::vector<mojom::ContentBlockPtr> output;
+                std::vector<mojom::WebSourcePtr> sources;
+                sources.push_back(mojom::WebSource::New(
+                    "Weather.com", GURL("https://weather.com"),
+                    GURL("https://imgs.search.brave.com/weather.ico")));
+                output.push_back(mojom::ContentBlock::NewWebSourcesContentBlock(
+                    mojom::WebSourcesContentBlock::New(std::move(sources),
+                                                       "weather")));
+                callback.Run(EngineConsumer::GenerationResultData(
+                    mojom::ConversationEntryEvent::NewToolUseEvent(
+                        mojom::ToolUseEvent::New("", "tool_id_1", "",
+                                                 std::move(output), nullptr,
+                                                 true)),
+                    std::nullopt));
+              }),
+          testing::WithArg<7>(
+              [&run_loop](
+                  EngineConsumer::GenerationCompletedCallback callback) {
+                std::move(callback).Run(
+                    base::ok(EngineConsumer::GenerationResultData(
+                        nullptr, std::nullopt)));
+                run_loop.QuitWhenIdle();
+              })));
+
+  // UI should be notified when tool output is set
+  EXPECT_CALL(untrusted_client, OnToolUseEventOutput(_, _))
+      .WillOnce([](const std::string& turn_uuid,
+                   mojom::ToolUseEventPtr tool_use_event) {
+        EXPECT_EQ(tool_use_event->tool_name, "brave_web_search");
+        EXPECT_EQ(tool_use_event->id, "tool_id_1");
+        ASSERT_TRUE(tool_use_event->output.has_value());
+        ASSERT_EQ(tool_use_event->output->size(), 1u);
+        EXPECT_TRUE(
+            tool_use_event->output->at(0)->is_web_sources_content_block());
+      });
+
+  conversation_handler_->SubmitHumanConversationEntry("What's the weather?",
+                                                      std::nullopt);
+  run_loop.Run();
+
+  // Verify the tool event has the output
+  const auto& history = conversation_handler_->GetConversationHistory();
+  ASSERT_EQ(history.size(), 2u);
+  auto& assistant_entry = history.back();
+  ASSERT_TRUE(assistant_entry->events.has_value());
+
+  // Should only have ONE tool use event (the request, updated with output)
+  size_t tool_use_count = 0;
+  for (const auto& event : *assistant_entry->events) {
+    if (event->is_tool_use_event()) {
+      tool_use_count++;
+      auto& tool_event = event->get_tool_use_event();
+      EXPECT_EQ(tool_event->tool_name, "brave_web_search");
+      EXPECT_EQ(tool_event->id, "tool_id_1");
+      EXPECT_TRUE(tool_event->output.has_value());
+    }
+  }
+  EXPECT_EQ(tool_use_count, 1u);
+}
+
+TEST_F(ConversationHandlerUnitTest,
+       ExtractSourcesFromRecentAssistantEntries_SingleEntry) {
+  // Test extracting sources from a single assistant entry with search tool
+  conversation_handler_->associated_content_manager()->ClearContent();
+  MockEngineConsumer* engine = static_cast<MockEngineConsumer*>(
+      conversation_handler_->GetEngineForTesting());
+
+  base::RunLoop run_loop;
+
+  // Engine returns search tool with sources
+  EXPECT_CALL(*engine, GenerateAssistantResponse)
+      .WillOnce(testing::DoAll(
+          testing::WithArg<6>(
+              [](EngineConsumer::GenerationDataCallback callback) {
+                // Tool request
+                callback.Run(EngineConsumer::GenerationResultData(
+                    mojom::ConversationEntryEvent::NewToolUseEvent(
+                        mojom::ToolUseEvent::New("brave_web_search",
+                                                 "tool_id_1",
+                                                 "{\"query\":\"test\"}",
+                                                 std::nullopt, nullptr, false)),
+                    std::nullopt));
+              }),
+          testing::WithArg<6>(
+              [](EngineConsumer::GenerationDataCallback callback) {
+                // Tool result with sources
+                std::vector<mojom::ContentBlockPtr> output;
+                std::vector<mojom::WebSourcePtr> sources;
+                sources.push_back(mojom::WebSource::New(
+                    "Source 1", GURL("https://source1.com"),
+                    GURL("https://imgs.search.brave.com/s1.ico")));
+                sources.push_back(mojom::WebSource::New(
+                    "Source 2", GURL("https://source2.com"),
+                    GURL("https://imgs.search.brave.com/s2.ico")));
+                output.push_back(mojom::ContentBlock::NewWebSourcesContentBlock(
+                    mojom::WebSourcesContentBlock::New(std::move(sources),
+                                                       "test query")));
+                callback.Run(EngineConsumer::GenerationResultData(
+                    mojom::ConversationEntryEvent::NewToolUseEvent(
+                        mojom::ToolUseEvent::New("", "tool_id_1", "",
+                                                 std::move(output), nullptr,
+                                                 true)),
+                    std::nullopt));
+              }),
+          testing::WithArg<6>(
+              [](EngineConsumer::GenerationDataCallback callback) {
+                // Final completion
+                callback.Run(EngineConsumer::GenerationResultData(
+                    mojom::ConversationEntryEvent::NewCompletionEvent(
+                        mojom::CompletionEvent::New("Here are the results")),
+                    std::nullopt));
+              }),
+          testing::WithArg<7>(
+              [&run_loop](
+                  EngineConsumer::GenerationCompletedCallback callback) {
+                std::move(callback).Run(
+                    base::ok(EngineConsumer::GenerationResultData(
+                        nullptr, std::nullopt)));
+                run_loop.QuitWhenIdle();
+              })));
+
+  conversation_handler_->SubmitHumanConversationEntry("Search for test",
+                                                      std::nullopt);
+  run_loop.Run();
+
+  // Verify sources were extracted and added as events
+  const auto& history = conversation_handler_->GetConversationHistory();
+  ASSERT_EQ(history.size(), 2u);
+  auto& assistant_entry = history.back();
+  ASSERT_TRUE(assistant_entry->events.has_value());
+
+  // Check for SourcesEvent and SearchQueriesEvent
+  bool has_sources_event = false;
+  bool has_search_queries_event = false;
+  for (const auto& event : *assistant_entry->events) {
+    if (event->is_sources_event()) {
+      has_sources_event = true;
+      EXPECT_EQ(event->get_sources_event()->sources.size(), 2u);
+    }
+    if (event->is_search_queries_event()) {
+      has_search_queries_event = true;
+      EXPECT_EQ(event->get_search_queries_event()->search_queries.size(), 1u);
+      EXPECT_EQ(event->get_search_queries_event()->search_queries[0],
+                "test query");
+    }
+  }
+  EXPECT_TRUE(has_sources_event);
+  EXPECT_TRUE(has_search_queries_event);
+}
+
+TEST_F(ConversationHandlerUnitTest,
+       ExtractSourcesFromRecentAssistantEntries_IgnoresNonSearchTools) {
+  // Test that non-search tools don't contribute to sources extraction
+  conversation_handler_->associated_content_manager()->ClearContent();
+
+  // Create history with a non-search tool
+  std::vector<mojom::ConversationTurnPtr> history;
+
+  // User entry
+  history.push_back(mojom::ConversationTurn::New(
+      "turn-0", mojom::CharacterType::HUMAN, mojom::ActionType::QUERY,
+      "Do something", std::nullopt, std::nullopt, std::nullopt,
+      base::Time::Now(), std::nullopt, std::nullopt, nullptr, false,
+      std::nullopt, nullptr));
+
+  // Assistant entry with page_summary tool (not a search tool)
+  std::vector<mojom::ConversationEntryEventPtr> events;
+  std::vector<mojom::ContentBlockPtr> output;
+  output.push_back(mojom::ContentBlock::NewTextContentBlock(
+      mojom::TextContentBlock::New("Page summary text")));
+  events.push_back(
+      mojom::ConversationEntryEvent::NewToolUseEvent(mojom::ToolUseEvent::New(
+          "page_summary", "tool_id", "{}", std::move(output), nullptr, false)));
+  events.push_back(mojom::ConversationEntryEvent::NewCompletionEvent(
+      mojom::CompletionEvent::New("Here is the summary")));
+
+  history.push_back(mojom::ConversationTurn::New(
+      "turn-1", mojom::CharacterType::ASSISTANT, mojom::ActionType::RESPONSE,
+      "Here is the summary", std::nullopt, std::nullopt, std::move(events),
+      base::Time::Now(), std::nullopt, std::nullopt, nullptr, false,
+      std::nullopt, nullptr));
+
+  conversation_handler_->SetChatHistoryForTesting(std::move(history));
+
+  // Verify no sources events since tool isn't a search tool
+  const auto& final_history = conversation_handler_->GetConversationHistory();
+  auto& assistant_entry = final_history.back();
+  ASSERT_TRUE(assistant_entry->events.has_value());
+
+  for (const auto& event : *assistant_entry->events) {
+    EXPECT_FALSE(event->is_sources_event())
+        << "Non-search tools should not produce sources events";
+    EXPECT_FALSE(event->is_search_queries_event())
+        << "Non-search tools should not produce search queries events";
+  }
+}
+
+TEST_F(ConversationHandlerUnitTest,
+       ExtractSourcesFromRecentAssistantEntries_IgnoresPendingTools) {
+  // Test that pending tools (no output yet) are not extracted
+  conversation_handler_->associated_content_manager()->ClearContent();
+
+  // Create history with a pending search tool
+  std::vector<mojom::ConversationTurnPtr> history;
+
+  // User entry
+  history.push_back(mojom::ConversationTurn::New(
+      "turn-0", mojom::CharacterType::HUMAN, mojom::ActionType::QUERY,
+      "Search something", std::nullopt, std::nullopt, std::nullopt,
+      base::Time::Now(), std::nullopt, std::nullopt, nullptr, false,
+      std::nullopt, nullptr));
+
+  // Assistant entry with pending search tool (no output)
+  std::vector<mojom::ConversationEntryEventPtr> events;
+  events.push_back(
+      mojom::ConversationEntryEvent::NewToolUseEvent(mojom::ToolUseEvent::New(
+          "brave_web_search", "tool_id", "{\"query\":\"test\"}", std::nullopt,
+          nullptr, false)));
+
+  history.push_back(mojom::ConversationTurn::New(
+      "turn-1", mojom::CharacterType::ASSISTANT, mojom::ActionType::RESPONSE,
+      "", std::nullopt, std::nullopt, std::move(events), base::Time::Now(),
+      std::nullopt, std::nullopt, nullptr, false, std::nullopt, nullptr));
+
+  conversation_handler_->SetChatHistoryForTesting(std::move(history));
+
+  // Verify no sources events since tool is pending
+  const auto& final_history = conversation_handler_->GetConversationHistory();
+  auto& assistant_entry = final_history.back();
+  ASSERT_TRUE(assistant_entry->events.has_value());
+
+  for (const auto& event : *assistant_entry->events) {
+    EXPECT_FALSE(event->is_sources_event())
+        << "Pending tools should not produce sources events";
+  }
+}
+
+TEST_F(ConversationHandlerUnitTest,
+       MaybeRespondToNextToolUseRequest_ServerToolOnly) {
+  // Test that server-only tools don't trigger
+  // PerformPostToolAssistantGeneration
+  conversation_handler_->associated_content_manager()->ClearContent();
+  MockEngineConsumer* engine = static_cast<MockEngineConsumer*>(
+      conversation_handler_->GetEngineForTesting());
+
+  base::RunLoop run_loop;
+
+  // Engine returns server-side search tool with result
+  // Since it's server-side, no post-tool generation should happen
+  EXPECT_CALL(*engine, GenerateAssistantResponse)
+      .Times(1)  // Only the initial request, no post-tool generation
+      .WillOnce(testing::DoAll(
+          testing::WithArg<6>(
+              [](EngineConsumer::GenerationDataCallback callback) {
+                // Tool request
+                callback.Run(EngineConsumer::GenerationResultData(
+                    mojom::ConversationEntryEvent::NewToolUseEvent(
+                        mojom::ToolUseEvent::New("brave_web_search",
+                                                 "tool_id_1",
+                                                 "{\"query\":\"test\"}",
+                                                 std::nullopt, nullptr, false)),
+                    std::nullopt));
+              }),
+          testing::WithArg<6>(
+              [](EngineConsumer::GenerationDataCallback callback) {
+                // Tool result from server
+                std::vector<mojom::ContentBlockPtr> output;
+                std::vector<mojom::WebSourcePtr> sources;
+                sources.push_back(mojom::WebSource::New(
+                    "Source", GURL("https://source.com"),
+                    GURL("https://imgs.search.brave.com/s.ico")));
+                output.push_back(mojom::ContentBlock::NewWebSourcesContentBlock(
+                    mojom::WebSourcesContentBlock::New(std::move(sources),
+                                                       "test")));
+                callback.Run(EngineConsumer::GenerationResultData(
+                    mojom::ConversationEntryEvent::NewToolUseEvent(
+                        mojom::ToolUseEvent::New("", "tool_id_1", "",
+                                                 std::move(output), nullptr,
+                                                 true)),
+                    std::nullopt));
+              }),
+          testing::WithArg<6>(
+              [](EngineConsumer::GenerationDataCallback callback) {
+                // Final completion from server
+                callback.Run(EngineConsumer::GenerationResultData(
+                    mojom::ConversationEntryEvent::NewCompletionEvent(
+                        mojom::CompletionEvent::New("Server response")),
+                    std::nullopt));
+              }),
+          testing::WithArg<7>(
+              [&run_loop](
+                  EngineConsumer::GenerationCompletedCallback callback) {
+                std::move(callback).Run(
+                    base::ok(EngineConsumer::GenerationResultData(
+                        nullptr, std::nullopt)));
+                run_loop.QuitWhenIdle();
+              })));
+
+  conversation_handler_->SubmitHumanConversationEntry("Search test",
+                                                      std::nullopt);
+  run_loop.Run();
+
+  // Verify completion was received but no additional generation was triggered
+  const auto& history = conversation_handler_->GetConversationHistory();
+  ASSERT_EQ(history.size(), 2u);
+  EXPECT_EQ(history.back()->text, "Server response");
+}
+
+TEST_F(ConversationHandlerUnitTest,
+       MaybeRespondToNextToolUseRequest_ClientToolCompleted) {
+  // Test that client tools trigger PerformPostToolAssistantGeneration
+  conversation_handler_->associated_content_manager()->ClearContent();
+  MockEngineConsumer* engine = static_cast<MockEngineConsumer*>(
+      conversation_handler_->GetEngineForTesting());
+
+  auto tool1 =
+      std::make_unique<NiceMock<MockTool>>("weather_tool", "Get weather info");
+  tool1->set_requires_user_interaction_before_handling(false);
+
+  ON_CALL(*mock_tool_provider_, GetTools()).WillByDefault([&]() {
+    std::vector<base::WeakPtr<Tool>> tools;
+    tools.push_back(tool1->GetWeakPtr());
+    return tools;
+  });
+
+  EXPECT_CALL(*tool1, UseTool(StrEq("{\"location\":\"NYC\"}"), _))
+      .WillOnce(testing::WithArg<1>([](Tool::UseToolCallback callback) {
+        std::move(callback).Run(CreateContentBlocksForText("72 degrees"));
+      }));
+
+  base::RunLoop run_loop;
+
+  // Expect TWO calls: initial request + post-tool generation
+  EXPECT_CALL(*engine, GenerateAssistantResponse)
+      .Times(2)
+      .WillOnce(testing::DoAll(
+          testing::WithArg<6>(
+              [](EngineConsumer::GenerationDataCallback callback) {
+                // Tool request for client tool
+                callback.Run(EngineConsumer::GenerationResultData(
+                    mojom::ConversationEntryEvent::NewToolUseEvent(
+                        mojom::ToolUseEvent::New("weather_tool", "tool_id_1",
+                                                 "{\"location\":\"NYC\"}",
+                                                 std::nullopt, nullptr, false)),
+                    std::nullopt));
+              }),
+          testing::WithArg<7>(
+              [](EngineConsumer::GenerationCompletedCallback callback) {
+                std::move(callback).Run(
+                    base::ok(EngineConsumer::GenerationResultData(
+                        nullptr, std::nullopt)));
+              })))
+      .WillOnce(testing::DoAll(
+          testing::WithArg<6>(
+              [](EngineConsumer::GenerationDataCallback callback) {
+                callback.Run(EngineConsumer::GenerationResultData(
+                    mojom::ConversationEntryEvent::NewCompletionEvent(
+                        mojom::CompletionEvent::New(
+                            "The weather in NYC is 72 degrees")),
+                    std::nullopt));
+              }),
+          testing::WithArg<7>(
+              [&run_loop](
+                  EngineConsumer::GenerationCompletedCallback callback) {
+                std::move(callback).Run(
+                    base::ok(EngineConsumer::GenerationResultData(
+                        nullptr, std::nullopt)));
+                run_loop.QuitWhenIdle();
+              })));
+
+  conversation_handler_->SubmitHumanConversationEntry("What's the weather?",
+                                                      std::nullopt);
+  run_loop.Run();
+
+  // Verify both generations happened
+  const auto& history = conversation_handler_->GetConversationHistory();
+  ASSERT_GE(history.size(), 2u);
+  EXPECT_EQ(history.back()->text, "The weather in NYC is 72 degrees");
+}
+
+TEST_F(ConversationHandlerUnitTest,
+       MaybeRespondToNextToolUseRequest_MixedTools) {
+  // Test that having both server and client tool requests in the same turn
+  // triggers post-tool generation because the client tool needs processing.
+  // Server returns: server tool request, client tool request, then server tool
+  // result (all in first generation). Then client tool is executed locally,
+  // followed by post-tool generation.
+  conversation_handler_->associated_content_manager()->ClearContent();
+  MockEngineConsumer* engine = static_cast<MockEngineConsumer*>(
+      conversation_handler_->GetEngineForTesting());
+
+  auto client_tool =
+      std::make_unique<NiceMock<MockTool>>("weather_tool", "Get weather");
+  client_tool->set_requires_user_interaction_before_handling(false);
+
+  ON_CALL(*mock_tool_provider_, GetTools()).WillByDefault([&]() {
+    std::vector<base::WeakPtr<Tool>> tools;
+    tools.push_back(client_tool->GetWeakPtr());
+    return tools;
+  });
+
+  EXPECT_CALL(*client_tool, UseTool(StrEq("{\"location\":\"NYC\"}"), _))
+      .WillOnce(testing::WithArg<1>([](Tool::UseToolCallback callback) {
+        std::move(callback).Run(CreateContentBlocksForText("72 degrees"));
+      }));
+
+  base::RunLoop run_loop;
+
+  // Expect TWO calls because client tool is involved
+  EXPECT_CALL(*engine, GenerateAssistantResponse)
+      .Times(2)
+      .WillOnce(testing::DoAll(
+          testing::WithArg<6>(
+              [](EngineConsumer::GenerationDataCallback callback) {
+                // Server search tool request
+                callback.Run(EngineConsumer::GenerationResultData(
+                    mojom::ConversationEntryEvent::NewToolUseEvent(
+                        mojom::ToolUseEvent::New("brave_web_search",
+                                                 "tool_id_1",
+                                                 "{\"query\":\"NYC\"}",
+                                                 std::nullopt, nullptr, false)),
+                    std::nullopt));
+                // Client tool request (both requests in same turn)
+                callback.Run(EngineConsumer::GenerationResultData(
+                    mojom::ConversationEntryEvent::NewToolUseEvent(
+                        mojom::ToolUseEvent::New("weather_tool", "tool_id_2",
+                                                 "{\"location\":\"NYC\"}",
+                                                 std::nullopt, nullptr, false)),
+                    std::nullopt));
+                // Server tool result (server processed its own tool)
+                std::vector<mojom::ContentBlockPtr> output;
+                std::vector<mojom::WebSourcePtr> sources;
+                sources.push_back(mojom::WebSource::New(
+                    "Weather Site", GURL("https://weather.com"),
+                    GURL("https://imgs.search.brave.com/w.ico")));
+                output.push_back(mojom::ContentBlock::NewWebSourcesContentBlock(
+                    mojom::WebSourcesContentBlock::New(std::move(sources),
+                                                       "NYC weather")));
+                callback.Run(EngineConsumer::GenerationResultData(
+                    mojom::ConversationEntryEvent::NewToolUseEvent(
+                        mojom::ToolUseEvent::New("", "tool_id_1", "",
+                                                 std::move(output), nullptr,
+                                                 false)),
+                    std::nullopt));
+              }),
+          testing::WithArg<7>(
+              [](EngineConsumer::GenerationCompletedCallback callback) {
+                std::move(callback).Run(
+                    base::ok(EngineConsumer::GenerationResultData(
+                        nullptr, std::nullopt)));
+              })))
+      .WillOnce(testing::DoAll(
+          testing::WithArg<6>(
+              [](EngineConsumer::GenerationDataCallback callback) {
+                callback.Run(EngineConsumer::GenerationResultData(
+                    mojom::ConversationEntryEvent::NewCompletionEvent(
+                        mojom::CompletionEvent::New("NYC weather is 72F")),
+                    std::nullopt));
+              }),
+          testing::WithArg<7>(
+              [&run_loop](
+                  EngineConsumer::GenerationCompletedCallback callback) {
+                std::move(callback).Run(
+                    base::ok(EngineConsumer::GenerationResultData(
+                        nullptr, std::nullopt)));
+                run_loop.QuitWhenIdle();
+              })));
+
+  conversation_handler_->SubmitHumanConversationEntry("What's NYC weather?",
+                                                      std::nullopt);
+  run_loop.Run();
+
+  // Verify final completion
+  const auto& history = conversation_handler_->GetConversationHistory();
+  ASSERT_GE(history.size(), 2u);
+  EXPECT_EQ(history.back()->text, "NYC weather is 72F");
+}
+
 }  // namespace ai_chat
