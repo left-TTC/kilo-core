@@ -21,7 +21,6 @@
 #include "brave/browser/ui/views/frame/vertical_tabs/vertical_tab_strip_region_view.h"
 #include "brave/browser/ui/views/frame/vertical_tabs/vertical_tab_strip_widget_delegate_view.h"
 #include "brave/browser/ui/views/tabs/vertical_tab_utils.h"
-#include "brave/components/vector_icons/vector_icons.h"
 #include "chrome/browser/profiles/profile.h"
 #include "chrome/browser/ui/browser.h"
 #include "chrome/browser/ui/layout_constants.h"
@@ -331,18 +330,15 @@ bool BraveTab::IsActive() const {
 }
 
 bool BraveTab::ShouldPaintTabAccent() const {
-  return true;
-  // return controller_->ShouldPaintTabAccent(this);
+  return controller_->ShouldPaintTabAccent(this);
 }
 
 std::optional<SkColor> BraveTab::GetTabAccentColor() const {
-  return SK_ColorBLUE;
-  // return controller_->GetTabAccentColor(this);
+  return controller_->GetTabAccentColor(this);
 }
 
 ui::ImageModel BraveTab::GetTabAccentIcon() const {
-  return ui::ImageModel::FromVectorIcon(kLeoPlusAddIcon, SK_ColorWHITE);
-  // return controller_->GetTabAccentIcon(this);
+  return controller_->GetTabAccentIcon(this);
 }
 
 bool BraveTab::HandleKeyEvent(views::Textfield* sender,
