@@ -543,7 +543,6 @@ gfx::RectF BraveVerticalTabStyle::InsetAlignedBoundsIfNeeded(
   const auto* brave_tab = static_cast<const BraveTab*>(tab());
   CHECK(brave_tab);
   if (brave_tab->ShouldPaintTabAccent() && !brave_tab->data().pinned) {
-    LOG(ERROR) << "InsetAlignedBoundsIfNeeded() - should paint tab accent";
     // Add left inset for tab accent icon area if tab should have accent icon.
     // This will result in GetPath() returning a path with a left insetted by
     // kTabAccentIconAreaWidth * scale.
