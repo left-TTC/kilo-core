@@ -19,11 +19,6 @@ import {
   SelectedChatDetails,
 } from '../state/active_chat_context'
 import {
-  AIChatContext,
-  AIChatReactContext,
-  useIsSmall,
-} from '../state/ai_chat_context'
-import {
   ConversationContext,
   ConversationReactContext,
 } from '../state/conversation_context'
@@ -51,11 +46,9 @@ import { createTextContentBlock } from '../../common/content_block'
 import ToolEvent from '../../untrusted_conversation_frame/components/assistant_response/tool_event'
 import { taskConversationEntries } from './story_utils/history'
 import { toolUseCompleteAssistantDetailStorage } from './story_utils/events'
-import {
-  Content,
-  stringifyContent,
-} from '../components/input_box/editable_content'
+import { Content } from '../components/input_box/editable_content'
 import { getToolUseEvent } from '../../common/test_data_utils'
+import { MockContext } from '../state/mock_context'
 
 // TODO(https://github.com/brave/brave-browser/issues/47810): Attempt to split this file up
 
@@ -1098,10 +1091,10 @@ const meta: Meta<CustomArgs> = {
   args,
   decorators: [
     (Story, options) => {
-      const [, setArgs] = useArgs()
+      const [args, setArgs] = useArgs<CustomArgs>()
       return (
         <StoryContext
-          args={options.args}
+          args={args}
           setArgs={setArgs}
         >
           <Story />
@@ -1111,175 +1104,97 @@ const meta: Meta<CustomArgs> = {
   ],
 }
 
+// Sample data for Storybook
+const SAMPLE_SKILLS: Mojom.Skill[] = [
+  {
+    id: 'translate-mode',
+    shortcut: 'translate',
+    prompt: 'Translate the following text to English',
+    model: 'claude-3-haiku',
+    createdTime: { internalValue: BigInt(Date.now() * 1000) },
+    lastUsed: { internalValue: BigInt(Date.now() * 1000) },
+  },
+  {
+    id: 'simplify-mode',
+    shortcut: 'simplify',
+    prompt: 'Simplify the following concept in simple terms',
+    model: undefined,
+    createdTime: { internalValue: BigInt(Date.now() * 1000) },
+    lastUsed: { internalValue: BigInt((Date.now() - 86400000) * 1000) },
+  },
+  {
+    id: 'summarize-mode',
+    shortcut: 'summarize',
+    prompt: 'Summarize the following content in bullet points',
+    model: undefined,
+    createdTime: { internalValue: BigInt(Date.now() * 1000) },
+    lastUsed: { internalValue: BigInt((Date.now() - 3600000) * 1000) },
+  },
+]
+
+const SAMPLE_TABS: Mojom.TabData[] = [
+  {
+    id: 1,
+    contentId: 1,
+    url: { url: 'https://www.example.com' },
+    title: 'Example',
+  },
+  {
+    id: 2,
+    contentId: 2,
+    url: { url: 'https://topos.nz' },
+    title: 'NZ Topo',
+  },
+  {
+    id: 3,
+    contentId: 3,
+    url: { url: 'https://brave.com' },
+    title: 'Brave',
+  },
+  {
+    id: 4,
+    contentId: 4,
+    url: { url: 'https://search.brave.com' },
+    title: 'Brave Search',
+  },
+]
+
+const SAMPLE_BOOKMARKS: Mojom.Bookmark[] = [
+  {
+    id: BigInt(1),
+    url: { url: 'https://www.example.com' },
+    title: 'Example',
+  },
+  {
+    id: BigInt(2),
+    url: { url: 'https://topos.nz' },
+    title: 'NZ Topo',
+  },
+]
+
+const SAMPLE_HISTORY_ENTRIES: Mojom.HistoryEntry[] = [
+  {
+    id: BigInt(1),
+    url: { url: 'https://w3.org' },
+    title: 'W3',
+  },
+  {
+    id: BigInt(2),
+    url: { url: 'https://readr.nz' },
+    title: 'RSS Reader',
+  },
+]
+
 function StoryContext(
   props: React.PropsWithChildren<{
     args: CustomArgs
     setArgs: (newArgs: Partial<CustomArgs>) => void
   }>,
 ) {
-  const isSmall = useIsSmall()
-
-  const options = { args: props.args }
-  const { setArgs } = props
-
-  const associatedContent = options.args.hasAssociatedContent
-    ? ASSOCIATED_CONTENT
-    : new Mojom.AssociatedContent()
-  const suggestedQuestions = options.args.hasSuggestedQuestions
-    ? SAMPLE_QUESTIONS
-    : associatedContent
-      ? [SAMPLE_QUESTIONS[0]]
-      : []
-
-  const currentError = Mojom.APIError[options.args.currentErrorState]
-  const apiHasError = currentError !== Mojom.APIError.None
-  const currentModel = MODELS.find((m) => m.displayName === options.args.model)
-
-  const switchToBasicModel = () => {
-    const nonPremiumModel = MODELS.find(
-      (model) =>
-        model.options.leoModelOptions?.access === Mojom.ModelAccess.BASIC,
-    )
-    setArgs({ model: nonPremiumModel?.key })
-  }
-
-  const [showSidebar, setShowSidebar] = React.useState(isSmall)
-  const [isToolsMenuOpen, setIsToolsMenuOpen] = React.useState(false)
-
-  let conversations: typeof CONVERSATIONS = []
-
-  if (CONVERSATIONS.length <= options.args.conversationListCount) {
-    conversations = conversations.concat(CONVERSATIONS)
-  } else {
-    const remainingConversationsCount =
-      options.args.conversationListCount - conversations.length
-    conversations = conversations.concat(
-      CONVERSATIONS.slice(0, remainingConversationsCount),
-    )
-  }
-
-  const aiChatContext: AIChatContext = {
-    conversationEntriesComponent: StorybookConversationEntries,
-    initialized: options.args.initialized,
-    editingConversationId: options.args.editingConversationId,
-    deletingConversationId: options.args.deletingConversationId,
-    conversations,
-    isStoragePrefEnabled: options.args.isStoragePrefEnabled,
-    hasAcceptedAgreement: options.args.hasAcceptedAgreement,
-    isPremiumStatusFetching: false,
-    isPremiumUser: options.args.isPremiumUser,
-    isPremiumUserDisconnected: options.args.isPremiumUserDisconnected,
-    isStorageNoticeDismissed: options.args.isStorageNoticeDismissed,
-    canShowPremiumPrompt: options.args.canShowPremiumPrompt,
-    isMobile: options.args.isMobile,
-    isHistoryFeatureEnabled: options.args.isHistoryEnabled,
-    isAIChatAgentProfileFeatureEnabled:
-      options.args.isAIChatAgentProfileFeatureEnabled,
-    isAIChatAgentProfile: options.args.isAIChatAgentProfile,
-    isStandalone: options.args.isStandalone,
-    skills: [
-      {
-        id: 'translate-mode',
-        shortcut: 'translate',
-        prompt: 'Translate the following text to English',
-        model: 'claude-3-haiku',
-        createdTime: { internalValue: BigInt(Date.now() * 1000) },
-        lastUsed: { internalValue: BigInt(Date.now() * 1000) },
-      },
-      {
-        id: 'simplify-mode',
-        shortcut: 'simplify',
-        prompt: 'Simplify the following concept in simple terms',
-        model: undefined,
-        createdTime: { internalValue: BigInt(Date.now() * 1000) },
-        lastUsed: { internalValue: BigInt((Date.now() - 86400000) * 1000) },
-      },
-      {
-        id: 'summarize-mode',
-        shortcut: 'summarize',
-        prompt: 'Summarize the following content in bullet points',
-        model: undefined,
-        createdTime: { internalValue: BigInt(Date.now() * 1000) },
-        lastUsed: { internalValue: BigInt((Date.now() - 3600000) * 1000) },
-      },
-    ],
-    actionList: ACTIONS_LIST,
-    tabs: [
-      {
-        id: 1,
-        contentId: 1,
-        url: { url: 'https://www.example.com' },
-        title: 'Example',
-      },
-      {
-        id: 2,
-        contentId: 2,
-        url: { url: 'https://topos.nz' },
-        title: 'NZ Topo',
-      },
-      {
-        id: 3,
-        contentId: 3,
-        url: { url: 'https://brave.com' },
-        title: 'Brave',
-      },
-      {
-        id: 4,
-        contentId: 4,
-        url: { url: 'https://search.brave.com' },
-        title: 'Brave Search',
-      },
-    ],
-    getPluralString: () => Promise.resolve(''),
-    goPremium: () => {},
-    managePremium: () => {},
-    handleAgreeClick: () => {},
-    enableStoragePref: () => {},
-    dismissStorageNotice: () => {},
-    dismissPremiumPrompt: () => {},
-    userRefreshPremiumSession: () => {},
-    openAIChatAgentProfile: () => {},
-    setEditingConversationId: (id: string | null) =>
-      setArgs({ editingConversationId: id }),
-    setDeletingConversationId: (id: string | null) =>
-      setArgs({ deletingConversationId: id }),
-    skillDialog: options.args.skillDialog,
-    setSkillDialog: () => {},
-    showSidebar: showSidebar,
-    toggleSidebar: () => setShowSidebar((s) => !s),
-    getBookmarks: async () => [
-      {
-        id: BigInt(1),
-        url: { url: 'https://www.example.com' },
-        title: 'Example',
-        createdTime: { internalValue: BigInt(Date.now() * 1000) },
-        lastUsed: { internalValue: BigInt(Date.now() * 1000) },
-      },
-      {
-        id: BigInt(2),
-        url: { url: 'https://topos.nz' },
-        title: 'NZ Topo',
-        createdTime: { internalValue: BigInt(Date.now() * 1000) },
-        lastUsed: { internalValue: BigInt(Date.now() * 1000) },
-      },
-    ],
-    getHistory: async () => [
-      {
-        id: BigInt(1),
-        url: { url: 'https://w3.org' },
-        title: 'W3',
-        createdTime: { internalValue: BigInt(Date.now() * 1000) },
-        lastUsed: { internalValue: BigInt(Date.now() * 1000) },
-      },
-      {
-        id: BigInt(2),
-        url: { url: 'https://readr.nz' },
-        title: 'RSS Reader',
-        createdTime: { internalValue: BigInt(Date.now() * 1000) },
-        lastUsed: { internalValue: BigInt(Date.now() * 1000) },
-      },
-    ],
-  }
+  const { args } = props
+  // Ref holds current args - for inside function lookup
+  const argsRef = React.useRef(args)
+  argsRef.current = args
 
   const activeChatContext: SelectedChatDetails = {
     selectedConversationId: CONVERSATIONS[0].uuid,
@@ -1426,7 +1341,69 @@ function StoryContext(
   }
 
   return (
-    <AIChatReactContext.Provider value={aiChatContext}>
+    <MockContext
+      service={{
+        getConversations: () => {
+          const count = argsRef.current.conversationListCount
+          const conversations =
+            CONVERSATIONS.length <= count
+              ? CONVERSATIONS
+              : CONVERSATIONS.slice(0, count)
+          return Promise.resolve({ conversations })
+        },
+        getActionMenuList: () => Promise.resolve({ actionList: ACTIONS_LIST }),
+        getSkills: () => Promise.resolve({ skills: SAMPLE_SKILLS }),
+        getPremiumStatus: () =>
+          Promise.resolve({
+            status: argsRef.current.isPremiumUser
+              ? argsRef.current.isPremiumUserDisconnected
+                ? Mojom.PremiumStatus.ActiveDisconnected
+                : Mojom.PremiumStatus.Active
+              : Mojom.PremiumStatus.Inactive,
+            info: null,
+          }),
+      }}
+      bookmarksService={{
+        getBookmarks: () => Promise.resolve({ bookmarks: SAMPLE_BOOKMARKS }),
+      }}
+      historyService={{
+        getHistory: () =>
+          Promise.resolve({
+            history: argsRef.current.isHistoryEnabled
+              ? SAMPLE_HISTORY_ENTRIES
+              : [],
+          }),
+      }}
+      initialState={React.useMemo(
+        () => ({
+          tabs: SAMPLE_TABS,
+          isStandalone: argsRef.current.isStandalone,
+          serviceState: {
+            hasAcceptedAgreement: argsRef.current.hasAcceptedAgreement,
+            isStoragePrefEnabled: argsRef.current.isStoragePrefEnabled,
+            isStorageNoticeDismissed: argsRef.current.isStorageNoticeDismissed,
+            canShowPremiumPrompt: argsRef.current.canShowPremiumPrompt,
+          },
+        }),
+        [argsRef.current],
+      )}
+      // Overrides for values that come from internal hooks (useState, etc.)
+      // and can't be controlled via API mocks
+
+      aiChatOverrides={{
+        conversationEntriesComponent: StorybookConversationEntries,
+        editingConversationId: args.editingConversationId,
+        deletingConversationId: args.deletingConversationId,
+        initialized: args.initialized,
+        isAIChatAgentProfileFeatureEnabled:
+          args.isAIChatAgentProfileFeatureEnabled,
+        isAIChatAgentProfile: args.isAIChatAgentProfile,
+        isMobile: args.isMobile,
+        isHistoryFeatureEnabled: args.isHistoryEnabled,
+        skillDialog: args.skillDialog,
+      }}
+      deps={[...Object.values(args)]}
+    >
       <ActiveChatContext.Provider value={activeChatContext}>
         <ConversationReactContext.Provider value={conversationContext}>
           <UntrustedConversationReactContext.Provider
@@ -1436,7 +1413,7 @@ function StoryContext(
           </UntrustedConversationReactContext.Provider>
         </ConversationReactContext.Provider>
       </ActiveChatContext.Provider>
-    </AIChatReactContext.Provider>
+    </MockContext>
   )
 }
 

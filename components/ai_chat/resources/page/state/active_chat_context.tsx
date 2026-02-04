@@ -5,7 +5,6 @@
 
 import * as React from 'react'
 import * as Mojom from '../../common/mojom'
-import getAPI, * as API from '../api'
 import { useRoute } from '$web-common/useRoute'
 import { useAIChat } from './ai_chat_context'
 
@@ -120,11 +119,13 @@ function ActiveChatProvider({
     }
   }, [conversationAPI])
 
+  const conversations = aiChat.api.useGetConversations().data
+
   // Handle the case where a non-existent chat has been selected:
   React.useEffect(() => {
     // We can't tell if an id is valid until we've loaded the list of
     // conversations.
-    if (!initialized) return
+    if (!aiChat.initialized) return
 
     // Special case the default conversation - it gets treated specially as
     // the chat is rebound as the tab navigates.
@@ -135,8 +136,8 @@ function ActiveChatProvider({
     // If this isn't a non-empty conversation, it could be an empty tab bound
     // conversation.
     let cancelled = false
-    getAPI()
-      .service.conversationExists(selectedConversationId)
+    aiChat.api.service
+      .conversationExists(selectedConversationId)
       .then(({ exists }) => {
         if (cancelled) return
         if (exists) return
@@ -146,10 +147,10 @@ function ActiveChatProvider({
     return () => {
       cancelled = true
     }
-  }, [conversations, selectedConversationId, initialized])
+  }, [conversations, selectedConversationId, aiChat.initialized])
 
   return (
-    <ActiveChatContext.Provider value={details as any}>
+    <ActiveChatContext.Provider value={details}>
       {conversationAPI && children}
     </ActiveChatContext.Provider>
   )
