@@ -5,7 +5,6 @@
 
 #include "base/test/launcher/test_launcher.h"
 
-#include "base/containers/contains.h"
 #include "brave/base/test/launcher/teamcity_reporter.h"
 
 #define TestLauncher TestLauncher_ChromiumImpl
