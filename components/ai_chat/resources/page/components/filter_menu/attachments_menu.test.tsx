@@ -6,28 +6,9 @@
 import '$test-utils/disable_custom_elements'
 
 import * as React from 'react'
-import {
-  ConversationReactContext,
-  ConversationContext,
-  defaultContext as defaultConversationContext,
-} from '../../state/conversation_context'
 import { act, render, waitFor } from '@testing-library/react'
 import { clearAllDataForTesting } from '$web-common/api'
 import { ContentType } from 'gen/brave/components/ai_chat/core/common/mojom/common.mojom.m.js'
-
-const MockContext = (
-  props: React.PropsWithChildren<Partial<AIChatContext & ConversationContext>>,
-) => {
-      <ConversationReactContext.Provider
-        value={{
-          ...defaultConversationContext,
-          ...props,
-        }}
-      >
-        {props.children}
-      </ConversationReactContext.Provider>
-  )
-}
 import * as Mojom from '../../../common/mojom'
 import { MockContext } from '../../state/mock_context'
 import TabsMenu from './attachments_menu'

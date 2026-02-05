@@ -7,29 +7,12 @@ import * as React from 'react'
 import { render } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import * as Mojom from '../../../common/mojom'
-import { useConversation } from '../../state/conversation_context'
 import { MockContext } from '../../state/mock_context'
 import { clearAllDataForTesting } from '$web-common/api'
 import ModelIntro from '.'
 
-jest.mock('../../state/conversation_context', () => ({
-  useConversation: jest.fn(),
-}))
-
 describe('ModelIntro', () => {
   beforeEach(() => {
-    ;(useConversation as jest.Mock).mockReturnValue({
-      currentModel: {
-        key: 'test-model',
-        displayName: 'Test Model',
-        options: {
-          leoModelOptions: {
-            category: Mojom.ModelCategory.CHAT,
-          },
-        },
-      },
-      isCurrentModelLeo: true,
-    })
     clearAllDataForTesting()
   })
 
@@ -46,6 +29,10 @@ describe('ModelIntro', () => {
   it('should render model intro', () => {
     const { container } = render(
       <MockContext
+        conversationOverrides={{
+          currentModel,
+          isCurrentModelLeo: true,
+        }}
       >
         <ModelIntro />
       </MockContext>,
@@ -70,6 +57,10 @@ describe('ModelIntro', () => {
   it('should render model intro tooltip', () => {
     const { container } = render(
       <MockContext
+        conversationOverrides={{
+          currentModel,
+          isCurrentModelLeo: true,
+        }}
       >
         <ModelIntro />
       </MockContext>,

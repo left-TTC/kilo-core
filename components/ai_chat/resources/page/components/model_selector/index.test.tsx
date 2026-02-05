@@ -8,17 +8,10 @@ import * as Mojom from '../../../common/mojom'
 import { render, act, within, waitFor } from '@testing-library/react'
 import { ModelSelector } from '.'
 import '@testing-library/jest-dom'
-import { useConversation } from '../../state/conversation_context'
-jest.mock('../../state/conversation_context', () => ({
-  useConversation: jest.fn(),
-}))
 import { MockContext } from '../../state/mock_context'
 import { clearAllDataForTesting } from '$web-common/api'
 
 describe('ModelSelector', () => {
-  const mockUseConversation = useConversation as jest.MockedFunction<
-    typeof useConversation
-  >
   beforeEach(() => {
     clearAllDataForTesting()
   })
@@ -100,17 +93,6 @@ describe('ModelSelector', () => {
     },
   ]
 
-  const defaultConversationContext = {
-    allModels: mockModels,
-    currentModel: mockModels[1],
-    setCurrentModel: jest.fn(),
-  }
-
-  beforeEach(() => {
-    jest.clearAllMocks()
-    mockUseConversation.mockReturnValue(defaultConversationContext as any)
-  })
-
   const getAnchorButton = () => {
     const anchorButton = document.querySelector<HTMLButtonElement>('leo-button')
     expect(anchorButton).toBeInTheDocument()
@@ -140,6 +122,10 @@ describe('ModelSelector', () => {
     return render(
       <MockContext
         initialState={{
+          conversationState: {
+            allModels: mockModels,
+            currentModelKey: 'chat-basic',
+          },
           ...props?.initialState,
         }}
         aiChatOverrides={{
@@ -147,6 +133,7 @@ describe('ModelSelector', () => {
           isAIChatAgentProfileFeatureEnabled: false,
           ...props?.aiChatOverrides,
         }}
+        conversationHandler={props?.conversationHandler}
       >
         <ModelSelector />
       </MockContext>,
@@ -237,12 +224,11 @@ describe('ModelSelector', () => {
 
   it('should call setCurrentModel when a model is clicked', async () => {
     const mockSetCurrentModel = jest.fn()
-    mockUseConversation.mockReturnValue({
-      ...defaultConversationContext,
-      setCurrentModel: mockSetCurrentModel,
-    } as any)
 
     renderModelSelector({
+      conversationHandler: {
+        changeModel: mockSetCurrentModel,
+      },
     })
 
     // Click the anchor button to show menu
@@ -287,12 +273,14 @@ describe('ModelSelector', () => {
       const filteredModels = mockModels.filter(
         (model) => model.supportsTools === true,
       )
-      mockUseConversation.mockReturnValue({
-        ...defaultConversationContext,
-        allModels: filteredModels,
-      } as any)
 
       renderModelSelector({
+        initialState: {
+          conversationState: {
+            allModels: filteredModels,
+            currentModelKey: 'chat-basic',
+          },
+        },
         aiChatOverrides: {
           isAIChatAgentProfileFeatureEnabled: true,
           isAIChatAgentProfile: true,

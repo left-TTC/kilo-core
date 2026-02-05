@@ -14,14 +14,6 @@ import { getKeysForMojomEnum } from '$web-common/mojomUtils'
 import { Url } from 'gen/url/mojom/url.mojom.m.js'
 import { InferControlsFromArgs } from '../../../../../.storybook/utils'
 import * as Mojom from '../../common/mojom'
-import {
-  ActiveChatContext,
-  SelectedChatDetails,
-} from '../state/active_chat_context'
-import {
-  ConversationContext,
-  ConversationReactContext,
-} from '../state/conversation_context'
 import FeedbackForm from '../components/feedback_form'
 import FullPage from '../components/full_page'
 import Loading from '../components/loading'
@@ -1196,138 +1188,43 @@ function StoryContext(
   const argsRef = React.useRef(args)
   argsRef.current = args
 
-  const activeChatContext: SelectedChatDetails = {
-    selectedConversationId: CONVERSATIONS[0].uuid,
-    updateSelectedConversationId: () => {},
-    callbackRouter: undefined!,
-    conversationHandler: undefined!,
-    createNewConversation: () => {},
-    isTabAssociated: options.args.isDefaultConversation,
-  }
+  // Compute derived values from args for UntrustedConversationContext
+  const getAssociatedContent = () =>
+    argsRef.current.hasAssociatedContent
+      ? ASSOCIATED_CONTENT
+      : new Mojom.AssociatedContent()
 
-  const inputText = options.args.inputText
+  const currentError = Mojom.APIError[args.currentErrorState]
+  const currentModel = MODELS.find((m) => m.displayName === args.model)
 
-  const conversationContext: ConversationContext = {
-    historyInitialized: true,
-    conversationUuid: options.args.isNewConversation
-      ? 'new-conversation'
-      : CONVERSATIONS[1].uuid,
-    conversationHistory: options.args.hasConversation
-      ? options.args.useMemoryHistory
+  const getConversationHistory = () =>
+    argsRef.current.hasConversation
+      ? argsRef.current.useMemoryHistory
         ? MEMORY_HISTORY
         : HISTORY
-      : [],
-    associatedContentInfo: [associatedContent],
-    allModels: MODELS,
-    currentModel,
-    suggestedQuestions,
-    isGenerating: options.args.isGenerating,
-    toolUseTaskState: Mojom.TaskState[options.args.toolUseTaskState],
-    suggestionStatus:
-      Mojom.SuggestionGenerationStatus[options.args.suggestionStatus],
-    currentError,
-    apiHasError,
-    isFeedbackFormVisible: options.args.isFeedbackFormVisible,
-    shouldDisableUserInput: false,
-    shouldShowLongPageWarning: options.args.shouldShowLongPageWarning,
-    shouldShowLongConversationInfo: options.args.shouldShowLongConversationInfo,
-    inputText,
-    selectedActionType: options.args.selectedActionType,
-    selectedSkill: options.args.selectedSkill,
-    isToolsMenuOpen,
-    isCurrentModelLeo: true,
-    isCharLimitApproaching: inputText.length > 64,
-    isCharLimitExceeded: inputText.length > 70,
-    inputTextCharCountDisplay: `${inputText.length} / 70`,
-    pendingMessageFiles: [],
-    generatedUrlToBeOpened: options.args.generatedUrlToBeOpened,
-    ratingTurnUuid: options.args.ratingTurnUuid,
-    isUploadingFiles: false,
-    isTemporaryChat: options.args.isTemporaryChat,
-    showPremiumSuggestionForRegenerate: false,
-    setInputText: (content) => setArgs({ inputText: content }),
-    setCurrentModel: () => {},
-    switchToBasicModel,
-    generateSuggestedQuestions: () => {},
-    dismissLongConversationInfo: () => {},
-    retryAPIRequest: () => {},
-    handleResetError: () => {},
-    handleStopGenerating: async () => {},
-    submitInputTextToAPI: () => {},
-    resetSelectedActionType: () => setArgs({ selectedActionType: undefined }),
-    handleActionTypeClick: (actionType: Mojom.ActionType) => {
-      const update: Partial<CustomArgs> = {
-        selectedActionType: actionType,
-        selectedSkill: undefined,
-      }
+      : []
 
-      const content = stringifyContent(options.args.inputText)
-      if (content.startsWith('/')) {
-        update.inputText = ['']
-      }
-
-      setArgs(update)
-      setIsToolsMenuOpen(false)
-    },
-    handleSkillClick: (skill: any) => {
-      setArgs({
-        selectedSkill: skill,
-        selectedActionType: undefined,
-        inputText: [
-          { type: 'skill', id: skill.shortcut, text: `/${skill.shortcut}` },
-        ],
-      })
-      setIsToolsMenuOpen(false)
-    },
-    handleSkillEdit: () => {},
-    setIsToolsMenuOpen,
-    handleFeedbackFormCancel: () => {},
-    handleFeedbackFormSubmit: () => Promise.resolve(),
-    setAttachmentsDialog: (attachmentsDialog) => setArgs({ attachmentsDialog }),
-    attachmentsDialog: options.args.attachmentsDialog,
-    removeFile: () => {},
-    uploadFile: () => {},
-    getScreenshots: () => {},
-    setGeneratedUrlToBeOpened: (url?: Url) =>
-      setArgs({ generatedUrlToBeOpened: url }),
-    setIgnoreExternalLinkWarning: () => {},
-    handleCloseRateMessagePrivacyModal: () =>
-      setArgs({ ratingTurnUuid: undefined }),
-    handleRateMessage: () => Promise.resolve(),
-    setTemporary: (temporary: boolean) => {
-      setArgs({ isTemporaryChat: temporary })
-    },
-    disassociateContent: () => {},
-    isDragActive: options.args.isDragActive,
-    isDragOver: options.args.isDragOver,
-    clearDragState: () => {},
-    attachImages: (images: Mojom.UploadedFile[]) => {},
-    pauseTask: () => {},
-    resumeTask: () => {},
-    stopTask: () => {},
-    unassociatedTabs: aiChatContext.tabs,
-    associateDefaultContent: async () => {},
-  }
-
+  // UntrustedConversationContext - still uses context object since not migrated
+  // to createInterfaceApi yet.
   const conversationEntriesContext: UntrustedConversationContext = {
-    conversationHistory: conversationContext.conversationHistory,
+    conversationHistory: getConversationHistory(),
     conversationCapability: Mojom.ConversationCapability.CONTENT_AGENT,
-    isGenerating: conversationContext.isGenerating,
+    isGenerating: args.isGenerating,
     isToolExecuting: args.isToolExecuting,
-    toolUseTaskState: conversationContext.toolUseTaskState,
-    isLeoModel: conversationContext.isCurrentModelLeo,
-    contentUsedPercentage: options.args.shouldShowLongPageWarning ? 48 : 100,
-    visualContentUsedPercentage: options.args.shouldShowLongVisualContentWarning
+    toolUseTaskState: Mojom.TaskState[args.toolUseTaskState],
+    isLeoModel: true,
+    contentUsedPercentage: args.shouldShowLongPageWarning ? 48 : 100,
+    visualContentUsedPercentage: args.shouldShowLongVisualContentWarning
       ? 75
       : undefined,
-    totalTokens: BigInt(options.args.totalTokens),
-    trimmedTokens: BigInt(options.args.trimmedTokens),
-    canSubmitUserEntries: !conversationContext.shouldDisableUserInput,
-    isMobile: aiChatContext.isMobile,
+    totalTokens: BigInt(args.totalTokens),
+    trimmedTokens: BigInt(args.trimmedTokens),
+    canSubmitUserEntries: currentError === Mojom.APIError.None,
+    isMobile: args.isMobile,
     allModels: MODELS,
     currentModelKey: currentModel?.key ?? '',
-    associatedContent: [associatedContent],
-    isPremiumUser: options.args.isPremiumUser,
+    associatedContent: [getAssociatedContent()],
+    isPremiumUser: args.isPremiumUser,
     uiHandler: {
       hasMemory: (memory: string) => {
         // Return false for the "undone" example to show undone state
@@ -1387,6 +1284,49 @@ function StoryContext(
         }),
         [argsRef.current],
       )}
+      conversationHandler={{
+        getState: () => {
+          return Promise.resolve({
+            conversationState: {
+              conversationUuid: argsRef.current.isNewConversation
+                ? 'new-conversation'
+                : CONVERSATIONS[1].uuid,
+              isRequestInProgress: argsRef.current.isGenerating,
+              currentModelKey:
+                MODELS.find((m) => m.displayName === argsRef.current.model)?.key
+                ?? MODELS[0].key,
+              defaultModelKey: MODELS[0].key,
+              allModels: MODELS,
+              suggestedQuestions: argsRef.current.hasSuggestedQuestions
+                ? SAMPLE_QUESTIONS
+                : argsRef.current.hasAssociatedContent
+                  ? [SAMPLE_QUESTIONS[0]]
+                  : [],
+              suggestionStatus:
+                Mojom.SuggestionGenerationStatus[
+                  argsRef.current.suggestionStatus
+                ],
+              associatedContent: [
+                argsRef.current.hasAssociatedContent
+                  ? ASSOCIATED_CONTENT
+                  : new Mojom.AssociatedContent(),
+              ],
+              error: Mojom.APIError[argsRef.current.currentErrorState],
+              temporary: argsRef.current.isTemporaryChat,
+              toolUseTaskState:
+                Mojom.TaskState[argsRef.current.toolUseTaskState],
+            },
+          })
+        },
+        getConversationHistory: () =>
+          Promise.resolve({
+            conversationHistory: getConversationHistory(),
+          }),
+      }}
+      conversationProps={{
+        selectedConversationId: CONVERSATIONS[0].uuid,
+        isTabAssociated: args.isDefaultConversation,
+      }}
       // Overrides for values that come from internal hooks (useState, etc.)
       // and can't be controlled via API mocks
 
@@ -1402,17 +1342,24 @@ function StoryContext(
         isHistoryFeatureEnabled: args.isHistoryEnabled,
         skillDialog: args.skillDialog,
       }}
+      conversationOverrides={{
+        isFeedbackFormVisible: args.isFeedbackFormVisible,
+        ratingTurnUuid: args.ratingTurnUuid,
+        inputText: args.inputText,
+        selectedActionType: args.selectedActionType,
+        selectedSkill: args.selectedSkill,
+        attachmentsDialog: args.attachmentsDialog,
+        isDragActive: args.isDragActive,
+        isDragOver: args.isDragOver,
+        generatedUrlToBeOpened: args.generatedUrlToBeOpened,
+      }}
       deps={[...Object.values(args)]}
     >
-      <ActiveChatContext.Provider value={activeChatContext}>
-        <ConversationReactContext.Provider value={conversationContext}>
-          <UntrustedConversationReactContext.Provider
-            value={conversationEntriesContext}
-          >
-            {props.children}
-          </UntrustedConversationReactContext.Provider>
-        </ConversationReactContext.Provider>
-      </ActiveChatContext.Provider>
+      <UntrustedConversationReactContext.Provider
+        value={conversationEntriesContext}
+      >
+        {props.children}
+      </UntrustedConversationReactContext.Provider>
     </MockContext>
   )
 }

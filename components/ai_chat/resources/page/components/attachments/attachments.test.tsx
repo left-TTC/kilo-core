@@ -7,11 +7,6 @@ import '$test-utils/disable_custom_elements'
 
 import * as React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import {
-  ConversationReactContext,
-  ConversationContext,
-  defaultContext as defaultConversationContext,
-} from '../../state/conversation_context'
 import { MockContext } from '../../state/mock_context'
 import { clearAllDataForTesting } from '$web-common/api'
 import Attachments from './index'
@@ -23,24 +18,6 @@ import {
   Bookmark,
   HistoryEntry,
 } from 'components/ai_chat/resources/common/mojom'
-
-const MockContext = (
-  props: React.PropsWithChildren<Partial<AIChatContext & ConversationContext>>,
-) => {
-  const mockContext = {
-    ...defaultConversationContext,
-    unassociatedTabs: [],
-    associatedContentInfo: [],
-    conversationUuid: undefined,
-    ...props,
-  }
-
-  return (
-      <ConversationReactContext.Provider value={mockContext}>
-        {props.children}
-      </ConversationReactContext.Provider>
-  )
-}
 
 const mockTabs = [
   {
