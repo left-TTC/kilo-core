@@ -3,14 +3,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at https://mozilla.org/MPL/2.0/. */
 
-import { StateStore } from '$web-common/state_store'
-
 import {
-  BackgroundState,
   BackgroundActions,
   NewTabPageAdMetricType,
   SelectedBackgroundType,
-} from '../state/background_state'
+  defaultBackgroundStore,
+} from '../state/background_store'
 
 import { StorybookArgs } from './storybook_args'
 
@@ -55,10 +53,9 @@ const sponsoredBackgrounds = {
   none: null,
 }
 
-export function createBackgroundHandler(
-  store: StateStore<BackgroundState>,
-  args: StorybookArgs,
-): BackgroundActions {
+export function createBackgroundStore(args: StorybookArgs) {
+  const store = defaultBackgroundStore()
+
   store.update({
     initialized: true,
     braveBackgrounds: [
@@ -81,7 +78,9 @@ export function createBackgroundHandler(
     sponsoredRichMediaBaseUrl: location.origin,
   })
 
-  return {
+  const actions: BackgroundActions = {
+    ...store.getState().actions,
+
     setBackgroundsEnabled(enabled) {
       store.update({ backgroundsEnabled: enabled })
     },
@@ -127,4 +126,8 @@ export function createBackgroundHandler(
       console.log('richMediaEvent', type)
     },
   }
+
+  store.update({ actions })
+
+  return store
 }
