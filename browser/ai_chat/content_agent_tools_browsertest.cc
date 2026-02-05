@@ -20,8 +20,10 @@
 #include "brave/components/ai_chat/core/common/test_utils.h"
 #include "chrome/browser/actor/actor_features.h"
 #include "chrome/browser/actor/actor_keyed_service_factory.h"
-#include "chrome/browser/actor/actor_policy_checker.h"
 #include "chrome/browser/actor/site_policy.h"
+#include "chrome/browser/glic/actor/glic_actor_policy_checker.h"
+#include "chrome/browser/glic/public/glic_keyed_service.h"
+#include "chrome/browser/glic/public/glic_keyed_service_factory.h"
 #include "chrome/browser/profiles/profile.h"
 #include "chrome/browser/ui/browser.h"
 #include "chrome/test/base/in_process_browser_test.h"
@@ -100,6 +102,14 @@ class ContentAgentToolsTest : public InProcessBrowserTest {
     // Ensure physical and css pixels are the same, as per tools_test_util.cc
     // - simplifies scroll distance calculations.
     command_line->AppendSwitchASCII(switches::kForceDeviceScaleFactor, "1");
+  }
+
+  glic::GlicKeyedService* GetGlicKeyedService() {
+    return glic::GlicKeyedServiceFactory::GetGlicKeyedService(GetProfile());
+  }
+
+  glic::GlicActorPolicyChecker& GetPolicyChecker() {
+    return GetGlicKeyedService()->actor_policy_checker();
   }
 
  protected:
@@ -385,7 +395,7 @@ IN_PROC_BROWSER_TEST_F(ContentAgentToolsTest, BlockExtensionStore) {
       actor::ActorKeyedServiceFactory::GetActorKeyedService(agent_profile_);
   ::actor::MayActOnUrl(GURL("https://chromewebstore.google.com/example"), false,
                        agent_profile_, actor_service->GetJournal(),
-                       actor::TaskId(), actor_service->GetPolicyChecker(),
+                       actor::TaskId(), GetPolicyChecker(),
                        allowed.GetCallback());
   EXPECT_NE(allowed.Take(), actor::MayActOnUrlBlockReason::kAllowed);
 }
