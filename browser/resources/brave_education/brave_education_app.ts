@@ -144,10 +144,9 @@ export class BraveEducationAppElement extends CrLitElement {
   }
 }
 
-
 declare global {
   interface HTMLElementTagNameMap {
-    'brave-education-app': BraveEducationAppElement;
+    'brave-education-app': BraveEducationAppElement
   }
 }
 
