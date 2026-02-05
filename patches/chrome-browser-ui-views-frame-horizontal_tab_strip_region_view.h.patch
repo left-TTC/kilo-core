@@ -1,8 +1,8 @@
 diff --git a/chrome/browser/ui/views/frame/horizontal_tab_strip_region_view.h b/chrome/browser/ui/views/frame/horizontal_tab_strip_region_view.h
-index cac14d659f786ba7ad20ef7d3c72698b97e270d1..1126e6a13239ed3a21fb94e10e32f21203848e64 100644
+index 5b2cdbc69f0b68ee338b7c94cf28ed1fcdc285e6..2bfcac74151872714ec0221cd74bbc7d74a7e566 100644
 --- a/chrome/browser/ui/views/frame/horizontal_tab_strip_region_view.h
 +++ b/chrome/browser/ui/views/frame/horizontal_tab_strip_region_view.h
-@@ -29,7 +29,7 @@ class TabSearchPositionMetricsLogger;
+@@ -38,7 +38,7 @@ class GlicButton;
  
  // Container for the tabstrip and the other views sharing space with it -
  // with the exception of the caption buttons.
