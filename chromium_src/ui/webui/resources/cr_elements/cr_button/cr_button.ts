@@ -9,17 +9,15 @@ import {CrLitElement, css, type CSSResultGroup, type PropertyValues} from '//res
 
 import {getHtml} from './cr_button.html.js';
 
-export interface CrButtonElement {
-  $: {
-    button: HTMLElement
-    prefixIcon: HTMLSlotElement
-    suffixIcon: HTMLSlotElement
-  };
-}
-
 export class CrButtonElement extends CrLitElement {
   static get is() {
     return 'cr-button';
+  }
+
+  declare $: {
+    button: HTMLElement
+    prefixIcon: HTMLSlotElement
+    suffixIcon: HTMLSlotElement
   }
 
   static override get styles(): CSSResultGroup {

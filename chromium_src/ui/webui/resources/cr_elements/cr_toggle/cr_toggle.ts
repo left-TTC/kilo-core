@@ -11,16 +11,14 @@ import {getHtml} from './cr_toggle.html.js';
 
 export const MOVE_THRESHOLD_PX: number = 5;
 
-export interface CrToggleElement {
-  $: {
-    toggle: HTMLElement
-    knob: HTMLElement
-  }
-}
-
 export class CrToggleElement extends CrLitElement {
   static get is() {
     return 'cr-toggle';
+  }
+
+  declare $: {
+    toggle: HTMLElement
+    knob: HTMLElement
   }
 
   static override get styles(): CSSResultGroup{ return css`` }
