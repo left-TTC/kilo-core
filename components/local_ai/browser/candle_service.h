@@ -9,9 +9,11 @@
 #include <memory>
 #include <vector>
 
+#include "base/files/file_path.h"
 #include "base/functional/callback.h"
 #include "base/memory/weak_ptr.h"
 #include "base/timer/timer.h"
+#include "brave/components/local_ai/browser/local_models_updater.h"
 #include "brave/components/local_ai/common/candle.mojom.h"
 #include "components/keyed_service/core/keyed_service.h"
 #include "content/public/browser/web_contents_observer.h"
@@ -49,7 +51,9 @@ class WasmWebContentsObserver : public content::WebContentsObserver {
   raw_ptr<CandleService> service_;
 };
 
-class CandleService : public KeyedService, public mojom::CandleService {
+class CandleService : public KeyedService,
+                      public mojom::CandleService,
+                      public LocalModelsUpdaterState::Observer {
  public:
   explicit CandleService(content::BrowserContext* browser_context);
   ~CandleService() override;
@@ -71,9 +75,16 @@ class CandleService : public KeyedService, public mojom::CandleService {
  private:
   friend class WasmWebContentsObserver;
 
+  // LocalModelsUpdaterState::Observer:
+  void OnLocalModelsReady(const base::FilePath& install_dir) override;
+
   // KeyedService:
   void Shutdown() override;
 
+  void LoadModelFiles();
+  void OnEmbeddingGemmaModelFilesLoaded(mojom::ModelFilesPtr model_files);
+  void OnModelFilesLoaded(bool success);
+  void RetryLoadModel();
   void EnsureWasmWebContents();
   void CloseWasmWebContents();
   void StartIdleTimer();
@@ -93,9 +104,15 @@ class CandleService : public KeyedService, public mojom::CandleService {
   // Single embedder remote (shared by all callers)
   mojo::Remote<mojom::EmbeddingGemmaInterface> embedding_gemma_remote_;
 
+  // Model loading state
+  base::FilePath pending_model_path_;
+  int model_load_retry_count_ = 0;
+  static constexpr int kMaxModelLoadRetries = 10;
+
   // Track readiness conditions
   bool wasm_page_loaded_ = false;
-  bool embedding_ready_ = false;
+  bool component_ready_ = false;
+  bool model_initialized_ = false;
 
   // Queue for pending Embed requests while model is initializing
   struct PendingEmbedRequest {
@@ -110,6 +127,7 @@ class CandleService : public KeyedService, public mojom::CandleService {
   };
   std::vector<PendingEmbedRequest> pending_embed_requests_;
 
+  void TryLoadModel();
   void ProcessPendingEmbedRequests();
 
   // Idle timer to close WebContents when not in use

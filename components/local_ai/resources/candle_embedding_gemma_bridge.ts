@@ -6,6 +6,7 @@
 import {
   CandleService,
   EmbeddingGemmaInterfaceReceiver,
+  ModelFiles,
 } from 'gen/brave/components/local_ai/common/candle.mojom.m.js'
 
 console.log('[Candle WASM] Embedding Gemma Script loaded')
@@ -20,16 +21,130 @@ console.log('[Candle WASM] CandleService remote obtained:', candleService)
 // Implement the EmbeddingGemmaInterface Mojo observer
 class EmbeddingGemmaInterfaceImpl {
   receiver: EmbeddingGemmaInterfaceReceiver
+  embedder: any | null
+  isInitialized: boolean
+  initTime: number
 
   constructor() {
     this.receiver = new EmbeddingGemmaInterfaceReceiver(this)
+    this.embedder = null
+    this.isInitialized = false
+    this.initTime = 0
+  }
+
+  // Implementation of EmbeddingGemmaInterface::Init
+  async init(modelFiles: ModelFiles): Promise<{ success: boolean }> {
+    if (this.isInitialized) {
+      console.log('Model already initialized')
+      return { success: true }
+    }
+
+    const startTime = performance.now()
+    console.log('Loading Embedding Gemma model from provided files...')
+
+    try {
+      // Helper function to extract data from BigBuffer
+      const extractBigBuffer = (
+        buffer: any,
+        name: string,
+      ): Uint8Array | null => {
+        if (buffer.bytes) {
+          const data = new Uint8Array(buffer.bytes)
+          console.log(`${name} using inline bytes, size:`, data.byteLength)
+          return data
+        } else if (buffer.sharedMemory) {
+          const sharedMem = buffer.sharedMemory
+          console.log(`${name} shared memory size:`, sharedMem.size)
+          const mapResult = sharedMem.bufferHandle.mapBuffer(0, sharedMem.size)
+          if (!mapResult.buffer) {
+            console.error(
+              `Failed to map ${name} shared buffer, ` + `result:`,
+              mapResult.result,
+            )
+            return null
+          }
+          const data = new Uint8Array(mapResult.buffer)
+          console.log(`${name} using shared memory, size:`, data.byteLength)
+          return data
+        } else {
+          console.error(
+            `Invalid ${name} BigBuffer: ` + `no bytes or shared memory`,
+          )
+          return null
+        }
+      }
+
+      // Extract all model files from BigBuffer
+      console.log('Extracting model files from BigBuffer...')
+      const weightsData = extractBigBuffer(modelFiles.weights, 'Weights')
+      const weightsDense1Data = extractBigBuffer(
+        modelFiles.weightsDense1,
+        'WeightsDense1',
+      )
+      const weightsDense2Data = extractBigBuffer(
+        modelFiles.weightsDense2,
+        'WeightsDense2',
+      )
+      const tokenizerData = extractBigBuffer(modelFiles.tokenizer, 'Tokenizer')
+      const configData = extractBigBuffer(modelFiles.config, 'Config')
+
+      if (
+        !weightsData
+        || !weightsDense1Data
+        || !weightsDense2Data
+        || !tokenizerData
+        || !configData
+      ) {
+        console.error('Failed to extract model files')
+        return { success: false }
+      }
+
+      // Dynamically import the WASM Gemma3Embedder class
+      console.log('Importing Gemma3Embedder module...')
+      const module = await import(
+        // @ts-ignore - Module path resolved at runtime via resources
+        'chrome-untrusted://resources/brave/candle_embedding_gemma.bundle.js'
+      )
+      const { Gemma3Embedder } = module
+
+      console.log('Creating Gemma3Embedder instance...')
+      this.embedder = new Gemma3Embedder(
+        weightsData,
+        weightsDense1Data,
+        weightsDense2Data,
+        tokenizerData,
+        configData,
+      )
+      this.isInitialized = true
+      this.initTime = performance.now() - startTime
+      console.log(
+        `Embedding Gemma model loaded successfully in `
+          + `${this.initTime.toFixed(2)}ms`,
+      )
+      return { success: true }
+    } catch (error) {
+      console.error('Failed to load model:', error)
+      return { success: false }
+    }
   }
 
   // Implementation of EmbeddingGemmaInterface::Embed
   async embed(input: string): Promise<{ output: number[] }> {
-    console.log('[Candle WASM] Embed called (model not loaded yet):', input)
-    // Model loading will be added in branch 3
-    return { output: [] }
+    if (!this.isInitialized || !this.embedder) {
+      console.error('Model not initialized')
+      return { output: [] }
+    }
+
+    try {
+      console.log('Running embedding inference on input:', input)
+      const embedding = this.embedder.embed(input)
+      console.log('Embedding generated, length:', embedding.length)
+      // Convert Float32Array to number[] (array<double> in mojo)
+      return { output: Array.from(embedding) }
+    } catch (error) {
+      console.error('Error running embedding:', error)
+      return { output: [] }
+    }
   }
 
   getPendingRemote() {
