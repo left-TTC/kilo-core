@@ -324,6 +324,7 @@ static_library("browser") {
     ":transaction",
     "//base",
     "//brave/components/brave_component_updater/browser:public",
+    "//brave/components/brave_rewards/core/common:constants",
     "//brave/components/brave_stats/browser",
     "//brave/components/brave_wallet/api",
     "//brave/components/brave_wallet/browser/bitcoin:generated_bitcoin_rpc_responses",
