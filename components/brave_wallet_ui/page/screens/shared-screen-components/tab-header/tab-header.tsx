@@ -11,7 +11,6 @@ import { useOnClickOutside } from '../../../../common/hooks/useOnClickOutside'
 // Styled Components
 import {
   HeaderWrapper,
-  BraveLogo,
   SettingsButton,
   SettingsIcon,
   SettingsWrapper,
@@ -49,9 +48,7 @@ export const TabHeader = (props: Props) => {
       <Row
         rowHeight='full'
         verticalAlign='center'
-      >
-        <BraveLogo />
-      </Row>
+      />
       {!hideHeaderMenu && (
         <SettingsWrapper ref={settingsModalRef}>
           <SettingsButton onClick={() => setShowSettings((prev) => !prev)}>

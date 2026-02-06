@@ -147,8 +147,10 @@ SidePanelEntryId SidePanelIdFromSideBarItemType(BuiltInItemType type) {
 #endif
     case BuiltInItemType::kWallet:
       [[fallthrough]];
+#ifdef ENABLE_TALK_ORIGIN
     case BuiltInItemType::kBraveTalk:
       [[fallthrough]];
+#endif
     case BuiltInItemType::kHistory:
       [[fallthrough]];
     case BuiltInItemType::kNone:

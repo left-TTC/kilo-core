@@ -6,7 +6,7 @@
 import * as React from 'react'
 import Icon from '@brave/leo/react/icon'
 
-import { braveSearchHost } from '../../state/search_state'
+// import { braveSearchHost } from '../../state/search_state'
 
 import { useSearchState } from '../../context/search_context'
 import { useSearchInputState } from './search_input_state'
@@ -34,7 +34,7 @@ export function SearchBox(props: Props) {
     document.body.classList.toggle('search-box-expanded', expanded)
   }, [expanded])
 
-  const engineHost = inputState.searchEngine?.host
+//   const engineHost = inputState.searchEngine?.host
 
   function focusInput() {
     inputRef.current?.focus()
@@ -67,9 +67,9 @@ export function SearchBox(props: Props) {
             ref={inputRef}
             type='text'
             placeholder={
-              engineHost === braveSearchHost
-                ? getString(S.NEW_TAB_SEARCH_BOX_PLACEHOLDER_TEXT_BRAVE)
-                : getString(S.NEW_TAB_SEARCH_BOX_PLACEHOLDER_TEXT)
+            //   engineHost != braveSearchHost
+            //     ? getString(S.NEW_TAB_SEARCH_BOX_PLACEHOLDER_TEXT_BRAVE)
+                 getString(S.NEW_TAB_SEARCH_BOX_PLACEHOLDER_TEXT)
             }
             tabIndex={1}
             value={inputState.query}

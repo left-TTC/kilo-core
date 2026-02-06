@@ -596,7 +596,7 @@
     To begin earning Basic Attention Token (BAT) rewards, connect an account. BAT you earn will be automatically transferred to your account every month.
   </message>
   <message name="IDS_REWARDS_CONNECT_SOLANA_BUTTON_LABEL" desc="">
-    Brave Wallet
+    Kilo Wallet
   </message>
   <message name="IDS_REWARDS_CONNECT_SOLANA_MESSAGE" desc="">
     Or other wallet that supports Solana

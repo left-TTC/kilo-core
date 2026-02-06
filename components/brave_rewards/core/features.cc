@@ -4,6 +4,8 @@
  * You can obtain one at https://mozilla.org/MPL/2.0/. */
 
 #include "brave/components/brave_rewards/core/features.h"
+#include "brave/components/brave_rewards/core/buildflags/buildflags.h"
+
 
 namespace brave_rewards::features {
 
@@ -11,7 +13,13 @@ namespace brave_rewards::features {
 #if defined(ARCH_CPU_X86_FAMILY) && defined(OFFICIAL_BUILD)
 BASE_FEATURE(kBraveRewards, base::FEATURE_DISABLED_BY_DEFAULT);
 #else
+
+#if BUILDFLAG(ENABLE_KILO_REWARDS)
 BASE_FEATURE(kBraveRewards, base::FEATURE_ENABLED_BY_DEFAULT);
+#else
+BASE_FEATURE(kBraveRewards, base::FEATURE_DISABLED_BY_DEFAULT);
+#endif
+
 #endif
 #endif  // BUILDFLAG(IS_ANDROID)
 

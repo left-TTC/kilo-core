@@ -34,16 +34,18 @@ import { useSafeUISelector } from '../../../../common/hooks/use-safe-selector'
 import * as leo from '@brave/leo/tokens/css/variables'
 import { Row, VerticalSpace } from '../../../../components/shared/style'
 import {
-  BraveIcon,
+//   BraveIcon,
   Content,
   WelcomePageBackground,
   WelcomePageWrapper,
   Title,
   Heading,
   ActionsContainer,
-  Footer,
+//   Footer,
   SubHeading,
 } from './onboarding-welcome.style'
+
+import kilo from "../../../../assets/svg-icons/kilo-128.svg"
 
 export const OnboardingWelcome = () => {
   // routing
@@ -61,13 +63,11 @@ export const OnboardingWelcome = () => {
 
   const walletIcons = isMobile
     ? [
-        'brave-icon-release-color',
         'phantom-color',
         'metamask-color',
         'coinbase-color',
       ]
     : [
-        'brave-icon-release-color',
         'phantom-color',
         'metamask-color',
         'coinbase-color',
@@ -94,7 +94,8 @@ export const OnboardingWelcome = () => {
             justifyContent='flex-start'
             marginBottom={leo.spacing['5Xl']}
           >
-            <BraveIcon />
+            {/* <BraveIcon /> */}
+            <img src={kilo} style={{width:"20px"}} />
             <Title>{getLocale('braveWalletTitle')}</Title>
           </Row>
           <Heading>{getLocale('braveWalletWelcomeTitle')}</Heading>
@@ -131,7 +132,7 @@ export const OnboardingWelcome = () => {
             />
           </ActionsContainer>
           <VerticalSpace space='96px' />
-          <Footer>{getLocale('braveWalletCopyright')}</Footer>
+          {/* <Footer>{getLocale('braveWalletCopyright')}</Footer> */}
         </Content>
       </WelcomePageWrapper>
     </>

@@ -7,11 +7,15 @@
 
 #include <string_view>
 
+
 #include "brave/components/decentralized_dns/core/constants.h"
 #include "brave/components/decentralized_dns/core/pref_names.h"
 #include "brave/net/decentralized_dns/constants.h"
 #include "components/prefs/pref_registry_simple.h"
 #include "components/prefs/pref_service.h"
+
+#include "base/logging.h"
+
 
 namespace decentralized_dns {
 
@@ -24,7 +28,16 @@ void RegisterLocalStatePrefs(PrefRegistrySimple* registry) {
       kEnsOffchainResolveMethod,
       static_cast<int>(EnsOffchainResolveMethod::kAsk));
   registry->RegisterIntegerPref(kSnsResolveMethod,
-                                static_cast<int>(ResolveMethodTypes::ASK));
+                                static_cast<int>(ResolveMethodTypes::DISABLED));
+
+    registry->RegisterIntegerPref(kWnsResolveMethod,
+                                static_cast<int>(ResolveMethodTypes::ENABLED));
+
+    registry->RegisterStringPref(kWnsResolveMethodGateWay, "https://ipfs.io");
+
+    registry->RegisterListPref(kWnsResolveRootNamesMethod);
+
+    registry->RegisterStringPref(kWnsRpcResolveWay, "https://api.devnet.solana.com");
 
   // Register prefs for migration.
   // Added 12/2023 to reset SNS pref to re-opt in with updated interstitial.
@@ -153,6 +166,80 @@ bool IsSnsResolveMethodEnabled(PrefService* local_state) {
   }
 
   return GetSnsResolveMethod(local_state) == ResolveMethodTypes::ENABLED;
+}
+
+
+
+ResolveMethodTypes GetWnsResolveMethod(PrefService* local_state) {
+  return static_cast<ResolveMethodTypes>(
+      local_state->GetInteger(kWnsResolveMethod));
+}
+
+bool IsWnsResolveMethodEnabled(PrefService* local_state) {
+    if (!local_state) {
+        LOG(INFO) << "FMC no this state";
+        return false;  // Treat it as disabled.
+    }
+
+    const ResolveMethodTypes local_type = GetWnsResolveMethod(local_state);
+    if (local_type == ResolveMethodTypes::ENABLED || local_type == ResolveMethodTypes::ASK){
+        LOG(INFO) << "FMC local is enable";
+        return true;
+    }   
+
+    LOG(INFO) << "FMC local is not enable";
+    return false;
+}
+
+
+
+//wns ipfs gateway: like http://ipfs.io/
+std::string GetIpfsGateWay(PrefService* local_state) {
+    return local_state->GetString(kWnsResolveMethodGateWay);
+}
+
+void SetIpfsGateWay(PrefService* local_state, const std::string& value) {
+    local_state->SetString(kWnsResolveMethodGateWay, value);
+}
+
+
+std::vector<std::string> GetWnsRootNames(PrefService* local_state) {
+    std::vector<std::string> result;
+
+    const base::Value::List& list =
+        local_state->GetList(kWnsResolveRootNamesMethod);
+
+    for (const base::Value& value : list) {
+        if (value.is_string()) {
+            result.push_back(value.GetString());
+            LOG(INFO) << "FMC read prefs' root name" << value.GetString();
+        }
+    }
+
+    return result;
+}
+
+void SetWnsRootNames(PrefService* local_state,
+                    const std::vector<std::string>& root_names
+) {
+    base::Value::List list;
+    for (const auto& root_name : root_names) {
+        LOG(INFO) << "FMC set new root name: " << root_name;
+        list.Append(root_name);
+    }
+
+    local_state->SetList(kWnsResolveRootNamesMethod, std::move(list));
+
+    LOG(INFO) << "WnsRootNames fully reset with " << root_names.size() << " entries.";
+}
+
+// 
+std::string GetRpcGateWay(PrefService* local_state) {
+    return local_state->GetString(kWnsRpcResolveWay);
+}
+
+void SetRpcGateWay(PrefService* local_state, const std::string& value) {
+    local_state->SetString(kWnsRpcResolveWay, value);
 }
 
 }  // namespace decentralized_dns

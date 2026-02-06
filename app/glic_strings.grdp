@@ -18,21 +18,21 @@
       $1<ex>Wikipedia</ex>
     </ph> - You're sharing this tab with Gemini for the duration of this conversation
   </message>
-  <message name="IDS_GLIC_PROMO_BODY" desc="Text for a promo pointing to the Gemini icon in Brave.">
+  <message name="IDS_GLIC_PROMO_BODY" desc="Text for a promo pointing to the Gemini icon in Kilo.">
     Chat with voice or text to get answers, key takeaways, and more as you browse
   </message>
   <if expr="is_win or is_linux">
-    <message name="IDS_GLIC_STATUS_ICON_MENU_CUSTOMIZE_KEYBOARD_SHORTCUT" desc="Menu text for the Gemini icon on the system try to open Brave settings and change the keyboard shortcut for opening Gemini in Brave.">
+    <message name="IDS_GLIC_STATUS_ICON_MENU_CUSTOMIZE_KEYBOARD_SHORTCUT" desc="Menu text for the Gemini icon on the system try to open Kilo settings and change the keyboard shortcut for opening Gemini in Kilo.">
       Customize keyboard shortcut
     </message>
   </if>
   <if expr="is_macosx">
-    <message name="IDS_GLIC_STATUS_ICON_MENU_CUSTOMIZE_KEYBOARD_SHORTCUT" desc="Menu text for the Gemini icon on the system try to open Brave settings and change the keyboard shortcut for opening Gemini in Brave. [With ellipsis]">
+    <message name="IDS_GLIC_STATUS_ICON_MENU_CUSTOMIZE_KEYBOARD_SHORTCUT" desc="Menu text for the Gemini icon on the system try to open Kilo settings and change the keyboard shortcut for opening Gemini in Kilo. [With ellipsis]">
       Customize Keyboard Shortcut...
     </message>
   </if>
   <if expr="is_win or is_linux">
-    <message name="IDS_GLIC_STATUS_ICON_MENU_EXIT" desc="This is the menu item for exiting Brave.">
+    <message name="IDS_GLIC_STATUS_ICON_MENU_EXIT" desc="This is the menu item for exiting Kilo.">
       Exit
     </message>
   </if>
@@ -134,7 +134,7 @@
     </message>
   </if>
   <message name="IDS_SETTINGS_GLIC_OS_WIDGET_TOGGLE_SUBLABEL" desc="Sublabel of the toggle that controls whether the Gemini icon is shown in the menu bar (on Mac) / system tray (on Windows and Linux).">
-    Easy access to use Gemini across your device, even if Brave is minimized.
+    Easy access to use Gemini across your device, even if Kilo is minimized.
   </message>
   <message name="IDS_SETTINGS_GLIC_KEYBOARD_SHORTCUT" desc="Name of the keyboard shortcut setting.">
     Keyboard shortcut
@@ -142,13 +142,13 @@
   <message name="IDS_SETTINGS_GLIC_KEYBOARD_SHORTCUT_SUBLABEL" desc="Sublabel describing the keyboard shortcut that's used to globally invoke Gemini.">
     Open Gemini with a keyboard shortcut.
   </message>
-  <message name="IDS_SETTINGS_GLIC_KEYBOARD_SHORTCUT_LEARN_MORE_LABEL" desc="Label for the 'Learn more' link in the sublabel for Gemini in Brave settings.">
+  <message name="IDS_SETTINGS_GLIC_KEYBOARD_SHORTCUT_LEARN_MORE_LABEL" desc="Label for the 'Learn more' link in the sublabel for Gemini in Kilo settings.">
     Learn more
   </message>
-  <message name="IDS_SETTINGS_GLIC_NAVIGATION_SHORTCUT" desc="Title for the navigation shortcut setting to leave and return to Gemini in Brave.">
+  <message name="IDS_SETTINGS_GLIC_NAVIGATION_SHORTCUT" desc="Title for the navigation shortcut setting to leave and return to Gemini in Kilo.">
     Navigation shortcut
   </message>
-  <message name="IDS_SETTINGS_GLIC_NAVIGATION_SHORTCUT_SUBLABEL" desc="Sublabel describing the keyboard shortcut navigate between Brave and Gemini.">
+  <message name="IDS_SETTINGS_GLIC_NAVIGATION_SHORTCUT_SUBLABEL" desc="Sublabel describing the keyboard shortcut navigate between Kilo and Gemini.">
     To leave or return to Gemini, use keyboard shortcut.
   </message>
   <message name="IDS_SETTINGS_GLIC_CLOSED_CAPTIONING" desc="Name of the closed captioning setting.">
@@ -218,7 +218,7 @@
     You can easily ask Gemini questions about your current tab as you browse
   </message>
   <message name="IDS_SETTINGS_GLIC_PERMISSIONS_TAB_ACCESS_CONSIDER_1" desc="First point in 'things to consider' column of the 'tab access' expando">
-    When you choose to share the current tab with Gemini, the tab’s full content and URL are sent to Brave.
+    When you choose to share the current tab with Gemini, the tab’s full content and URL are sent to Kilo.
   </message>
   <message name="IDS_SETTINGS_GLIC_PERMISSIONS_TAB_ACCESS_CONSIDER_1_LEARN_MORE_LABEL" desc="Label for the 'Learn more' link in the 'things to consider' section.">
     Learn more
@@ -227,7 +227,7 @@
     You can easily ask Gemini questions about the tabs you’re sharing as you browse
   </message>
   <message name="IDS_SETTINGS_GLIC_PERMISSIONS_DEFAULT_TAB_ACCESS_CONSIDER_1" desc="First point in 'things to consider' column of the 'default tab access' expands">
-    When tabs are shared, their page contents and URLs are sent to Brave
+    When tabs are shared, their page contents and URLs are sent to Kilo
   </message>
   <message name="IDS_SETTINGS_GLIC_PERMISSIONS_DEFAULT_TAB_ACCESS_CONSIDER_2" desc="Second point in 'things to consider' column of the 'default tab access' expands">
     Conversations about shared tabs may be seen by human reviewers to improve Gemini
@@ -245,7 +245,7 @@
     Gemini shows its steps and tries to confirm before taking sensitive ones. You can stop or take over anytime.
   </message>
   <message name="IDS_SETTINGS_GLIC_PERMISSIONS_WEB_ACTUATION_TOGGLE_CONSIDER_1" translateable="false" desc="First point in 'things to consider' column of the 'let Gemini browse for you' expands">
-    The page content and URLs that Gemini uses during a task will be shared with Brave.
+    The page content and URLs that Gemini uses during a task will be shared with Kilo.
   </message>
   <message name="IDS_SETTINGS_GLIC_PERMISSIONS_WEB_ACTUATION_TOGGLE_CONSIDER_2" translateable="false" desc="Second point in 'things to consider' column of the 'let Gemini browse for you' expands">
     Use Gemini carefully and <ph name="BEGIN_LINK1">&lt;a href="$1" target="_blank"&gt;</ph>safely<ph name="LINK_END1">&lt;/a&gt;</ph>. You are responsible for Gemini's actions during a task, including mistakes and <ph name="BEGIN_LINK2">&lt;a href="$2" target="_blank"&gt;</ph>unexpected results<ph name="LINK_END2">&lt;/a&gt;</ph> like purchases.
@@ -331,7 +331,7 @@
   </message>
 
   <!-- Gemini tab strip button label -->
-  <message name="IDS_GLIC_BUTTON_ENTRYPOINT_LABEL" desc="Label on the button used to open Gemini in Brave.">
+  <message name="IDS_GLIC_BUTTON_ENTRYPOINT_LABEL" desc="Label on the button used to open Gemini in Kilo.">
     Gemini
   </message>
 
@@ -349,10 +349,10 @@
   <if expr="not use_titlecase">
     <message name="IDS_GLIC_PROMO_CONFIRM" desc="The button that a user clicks to open Gemini." translateable="false">Try now</message>
   </if>
-  <message name="IDS_GLIC_TRYIT_TITLE" desc="Title for a promo pointing to the Gemini icon in Brave, that opens Gemini in Brave if selected." translateable="false">
+  <message name="IDS_GLIC_TRYIT_TITLE" desc="Title for a promo pointing to the Gemini icon in Kilo, that opens Gemini in Kilo if selected." translateable="false">
     Get help with your tasks
   </message>
-  <message name="IDS_GLIC_TRYIT_BODY" desc="Text for a promo pointing to the Gemini icon in Brave, that opens Gemini in Brave if selected." translateable="false">
-    Chat with Gemini in Brave to get answers, key takeaways, and more as you browse
+  <message name="IDS_GLIC_TRYIT_BODY" desc="Text for a promo pointing to the Gemini icon in Kilo, that opens Gemini in Kilo if selected." translateable="false">
+    Chat with Gemini in Kilo to get answers, key takeaways, and more as you browse
   </message>
 </grit-part>

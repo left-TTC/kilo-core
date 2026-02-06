@@ -5,6 +5,7 @@
 
 import("//brave/build/config.gni")
 import("//build/util/process_version.gni")
+import("//brave/build/kilo_feature.gni")
 
 static_library("version_info") {
   sources = [
@@ -34,6 +35,8 @@ process_version("generate_version_info") {
     "BRAVE_BROWSER_VERSION=\"$brave_version\"",
     "-e",
     "BRAVE_CHROMIUM_VERSION=\"$chrome_version_string\"",
+    "-e",
+    "KILO_BROWSER_VERSION=\"$kilo_version\"",
   ]
   output = "$target_gen_dir/version_info_values.h"
 }

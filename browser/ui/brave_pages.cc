@@ -48,10 +48,13 @@ void ShowBraveTalk(Browser* browser) {
 }
 
 void ShowFullpageChat(Browser* browser) {
-  if (!ai_chat::features::IsAIChatHistoryEnabled()) {
+#if BUILDFLAG(ENABLE_AI_CHAT)
+    if (!ai_chat::features::IsAIChatHistoryEnabled()) {
+        return;
+    }
+    ShowSingletonTabOverwritingNTP(browser, GURL(kAIChatUIURL));
+#endif
     return;
-  }
-  ShowSingletonTabOverwritingNTP(browser, GURL(kAIChatUIURL));
 }
 
 void ShowWebcompatReporter(Browser* browser) {

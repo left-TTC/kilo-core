@@ -86,7 +86,7 @@ inline constexpr char kChromeHelpViaKeyboardURL[] =
 
 inline constexpr char kChromeHelpViaMenuURL[] = "https://support.brave.app/";
 
-inline constexpr char kChromeHelpViaWebUIURL[] = "https://support.brave.app/";
+inline constexpr char kChromeHelpViaWebUIURL[] = "https://github.com/left-TTC/kilo-browser/docs/help.md";
 
 inline constexpr char kRelatedWebsiteSetsLearnMoreURL[] =
     "https://support.brave.app/";
@@ -147,7 +147,7 @@ inline constexpr char kChromeUIUntrustedNewTabPageUrl[] =
 
 // The URL for the Chromium project used in the About dialog.
 inline constexpr char16_t kChromiumProjectURL[] =
-    u"https://github.com/brave/brave-browser/";
+    u"https://github.com/left-TTC/kilo-browser/";
 
 inline constexpr char16_t kContentSettingsExceptionsLearnMoreURL[] =
     u"https://support.brave.app/hc/en-us/articles/"

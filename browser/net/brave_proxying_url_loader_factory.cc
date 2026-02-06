@@ -667,6 +667,11 @@ void BraveProxyingURLLoaderFactory::MaybeProxyRequest(
       factory_builder, navigation_response_task_runner);
 }
 
+#include "brave_web3_service.h"
+#include "brave_web3_task.h"
+#include "third_party/abseil-cpp/absl/types/optional.h"
+#include "services/network/public/cpp/shared_url_loader_factory.h"
+
 void BraveProxyingURLLoaderFactory::CreateLoaderAndStart(
     mojo::PendingReceiver<network::mojom::URLLoader> loader_receiver,
     int32_t request_id,
@@ -674,19 +679,92 @@ void BraveProxyingURLLoaderFactory::CreateLoaderAndStart(
     const network::ResourceRequest& request,
     mojo::PendingRemote<network::mojom::URLLoaderClient> client,
     const net::MutableNetworkTrafficAnnotationTag& traffic_annotation) {
-  DCHECK_CURRENTLY_ON(content::BrowserThread::UI);
 
-  // The request ID doesn't really matter in the Network Service path. It just
-  // needs to be unique per-BrowserContext so request handlers can make sense of
-  // it. Note that |network_service_request_id_| by contrast is not necessarily
-  // unique, so we don't use it for identity here.
-  const uint64_t brave_request_id = request_id_generator_->Generate();
+  	DCHECK_CURRENTLY_ON(content::BrowserThread::UI);
 
-  auto result = requests_.emplace(std::make_unique<InProgressRequest>(
-      *this, brave_request_id, request_id, frame_tree_node_id_, options,
-      request, browser_context_, traffic_annotation, std::move(loader_receiver),
-      std::move(client), navigation_response_task_runner_));
-  (*result.first)->Restart();
+    // The request ID doesn't really matter in the Network Service path. It just
+    // needs to be unique per-BrowserContext so request handlers can make sense of
+    // it. Note that |network_service_request_id_| by contrast is not necessarily
+    // unique, so we don't use it for identity here.
+    // const uint64_t brave_request_id = request_id_generator_->Generate();
+
+    // auto result = requests_.emplace(std::make_unique<InProgressRequest>(
+    //     *this, brave_request_id, request_id, render_process_id_,
+    //     frame_tree_node_id_, options, request, browser_context_,
+    //     traffic_annotation, std::move(loader_receiver), std::move(client),
+    //     navigation_response_task_runner_));
+
+    // InProgressRequest* request_ptr = result.first->get();
+
+    network::ResourceRequest modified_request = request;
+
+    const GURL& check_url = request.url;
+
+    // Functions that will be executed asynchronously
+    // we packed it there and will executed at the right time
+    base::OnceCallback<void(const GURL&, const bool is_web3_domain)> restart_cb =
+        base::BindOnce(
+            [](BraveProxyingURLLoaderFactory* factory,
+                content::FrameTreeNodeId frame_tree_node_id,
+                content::BrowserContext* browser_context,
+                scoped_refptr<base::SequencedTaskRunner> navigation_task_runner,
+                network::ResourceRequest modified_request,
+                mojo::PendingReceiver<network::mojom::URLLoader> loader_receiver,
+                int32_t request_id,
+                uint32_t options,
+                mojo::PendingRemote<network::mojom::URLLoaderClient> client,
+                const net::MutableNetworkTrafficAnnotationTag& traffic_annotation,
+                const GURL& new_url,
+                bool is_web3_domain) 
+            {
+
+                LOG(INFO) << "Original url: " << modified_request.url;
+                LOG(INFO) << "new url: " << new_url;
+
+                if (is_web3_domain) {
+                    LOG(INFO) << "redirect web3";
+                    Brave_web3_solana_task::redirect_request(&modified_request, new_url);
+                }
+
+                LOG(INFO) << "redirect to url: " << modified_request.url;
+
+                const uint64_t brave_request_id = factory->request_id_generator_->Generate();;
+
+                auto result = factory->requests_.emplace(
+                    std::make_unique<InProgressRequest>(
+                        *factory, 
+                        brave_request_id, 
+                        request_id,
+                        frame_tree_node_id,
+                        options, 
+                        modified_request, 
+                        browser_context,
+                        traffic_annotation, 
+                        std::move(loader_receiver),
+                        std::move(client),
+                        navigation_task_runner
+                    ));
+
+                (*result.first)->Restart();
+            },
+            this,
+            frame_tree_node_id_,                     
+            browser_context_,
+            navigation_response_task_runner_,
+            modified_request,
+            std::move(loader_receiver),
+            request_id,
+            options,
+            std::move(client),
+            traffic_annotation
+        );
+
+
+    // from this function we check the url and get the variable is_web3_domain
+    // when the parameter is_web3_domain is obtained
+    // Perform the following operations asynchronously
+    Brave_web3_solana_task::handle_web3_domain(
+        check_url, std::move(restart_cb), browser_context_);
 }
 
 void BraveProxyingURLLoaderFactory::Clone(

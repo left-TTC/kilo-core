@@ -124,7 +124,7 @@ bool IsBraveVPNWireguardEnabled(PrefService* local_state) {
 #endif
 }
 
-#if BUILDFLAG(IS_WIN)
+#if BUILDFLAG(IS_WIN) && BUILDFLAG(ENABLE_BRAVE_VPN_WIREGUARD)
 void EnableWireguardIfPossible(PrefService* local_prefs) {
   auto* wireguard_enabled_pref =
       local_prefs->FindPreference(prefs::kBraveVPNWireguardEnabled);

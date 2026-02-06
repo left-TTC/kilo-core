@@ -47,13 +47,19 @@ void OpenURLInBrowser(const char* url) {
   }
 }
 
+
 std::u16string GetVpnStatusLabel(bool active) {
+#if defined(ENABLE_BRAVE_VPN_WIREGUARD)
   return l10n_util::GetStringUTF16(
       active ? IDS_BRAVE_VPN_WIREGUARD_TRAY_STATUS_ITEM_ACTIVE
              : IDS_BRAVE_VPN_WIREGUARD_TRAY_STATUS_ITEM_INACTIVE);
+#else
+    return std::u16string();
+#endif
 }
 
 int GetStatusIconTooltip(brave_vpn::mojom::ConnectionState state) {
+#if defined(ENABLE_BRAVE_VPN_WIREGUARD)
   switch (state) {
     case brave_vpn::mojom::ConnectionState::CONNECTING:
       return IDS_BRAVE_VPN_WIREGUARD_TRAY_ICON_TOOLTIP_CONNECTING;
@@ -67,6 +73,9 @@ int GetStatusIconTooltip(brave_vpn::mojom::ConnectionState state) {
     case brave_vpn::mojom::ConnectionState::CONNECT_NOT_ALLOWED:
       return IDS_BRAVE_VPN_WIREGUARD_TRAY_ICON_TOOLTIP_ERROR;
   }
+#else
+  return 0;
+#endif
 
   NOTREACHED();
 }
@@ -179,10 +188,12 @@ void StatusTrayRunner::ExecuteCommand(int command_id, int event_flags) {
 }
 
 void StatusTrayRunner::OnMenuWillShow(ui::SimpleMenuModel* source) {
-  auto connected = IsVPNConnected();
+
+auto connected = IsVPNConnected();
   source->Clear();
   source->AddItem(IDC_BRAVE_VPN_TRAY_STATUS_ITEM, GetVpnStatusLabel(connected));
   source->SetEnabledAt(0, false);
+#if defined(ENABLE_BRAVE_VPN)
   if (connected) {
     source->AddItem(IDC_BRAVE_VPN_TRAY_DISCONNECT_VPN_ITEM,
                     l10n_util::GetStringUTF16(
@@ -203,6 +214,7 @@ void StatusTrayRunner::OnMenuWillShow(ui::SimpleMenuModel* source) {
   source->AddItem(
       IDC_BRAVE_VPN_TRAY_HIDE_ICON,
       l10n_util::GetStringUTF16(IDS_BRAVE_VPN_WIREGUARD_TRAY_REMOVE_ICON_ITEM));
+#endif
 }
 
 void StatusTrayRunner::OnConnected(bool success) {

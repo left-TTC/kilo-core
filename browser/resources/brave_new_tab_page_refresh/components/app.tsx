@@ -16,11 +16,11 @@ import { Clock } from './common/clock'
 import { LazyNewsFeed } from './news/lazy_news_feed'
 import { WidgetStack } from './widgets/widget_stack'
 import { useSearchLayoutReady, useWidgetLayoutReady } from './app_layout_ready'
-import useMediaQuery from '$web-common/useMediaQuery'
+// import useMediaQuery from '$web-common/useMediaQuery'
 
-import { style, threeColumnBreakpoint } from './app.style'
+import { style } from './app.style'
 
-const threeColumnQuery = `(width > ${threeColumnBreakpoint})`
+// const threeColumnQuery = `(width > ${threeColumnBreakpoint})`
 
 export function App() {
   const searchLayoutReady = useSearchLayoutReady()
@@ -29,7 +29,7 @@ export function App() {
   const [settingsView, setSettingsView] =
     React.useState<SettingsView | null>(null)
 
-  const threeColumnWidth = useMediaQuery(threeColumnQuery)
+//   const threeColumnWidth = useMediaQuery(threeColumnQuery)
 
   React.useEffect(() => {
     const params = new URLSearchParams(location.search)
@@ -77,20 +77,19 @@ export function App() {
         <div className='caption-container'>
           <BackgroundCaption />
         </div>
-        <div className='widget-container'>
-          {
-            widgetLayoutReady && <>
-              {
-                threeColumnWidth ?
-                  <>
-                    <WidgetStack name='left' tabs={['stats']} />
-                    <WidgetStack name='center' tabs={['news']} />
-                  </> :
-                  <WidgetStack name='left' tabs={['stats', 'news']} />
-              }
-              <WidgetStack name='right' tabs={['vpn', 'rewards', 'talk']} />
-            </>
-          }
+        <div style={{maxWidth:"70%"}}>
+            <div className='widget-container'>
+                {
+                    widgetLayoutReady && <>
+                    {/* {
+                        threeColumnWidth ?
+                        <WidgetStack name='left' tabs={['stats']} /> : */}
+                        <WidgetStack name='left' tabs={['stats']} />
+                    {/* } */}
+                    {/* <WidgetStack name='right' tabs={['news']} /> */}
+                    </>
+                }
+            </div>
         </div>
       </main>
       <div className='news-container'>

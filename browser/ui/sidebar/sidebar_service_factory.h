@@ -39,7 +39,11 @@ class SidebarServiceFactory : public BrowserContextKeyedServiceFactory {
 #if BUILDFLAG(ENABLE_AI_CHAT)
       SidebarItem::BuiltInItemType::kChatUI,
 #endif
-      SidebarItem::BuiltInItemType::kBraveTalk,
+
+#ifdef ENABLE_TALK_ORIGIN
+    SidebarItem::BuiltInItemType::kBraveTalk,
+#endif
+      
       SidebarItem::BuiltInItemType::kWallet,
       SidebarItem::BuiltInItemType::kBookmarks,
       SidebarItem::BuiltInItemType::kReadingList,

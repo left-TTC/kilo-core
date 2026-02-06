@@ -27,12 +27,24 @@ export const FeatureRequestButton = () => {
     })
   }, [])
 
+  const ifShow: boolean = false
+
+  const showCon = () => {
+    if(ifShow){
+        return (
+            <Button onClick={onClickFeatureRequestButton}>
+                <IdeaButtonIcon />
+                <ButtonText>
+                    {getLocale('braveWalletRequestFeatureButtonText')}
+                </ButtonText>
+            </Button>
+        )
+    }else {
+        return (<></>)
+    }
+  }
+
   return (
-    <Button onClick={onClickFeatureRequestButton}>
-      <IdeaButtonIcon />
-      <ButtonText>
-        {getLocale('braveWalletRequestFeatureButtonText')}
-      </ButtonText>
-    </Button>
+    showCon()
   )
 }

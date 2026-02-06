@@ -29,6 +29,7 @@ source_set("status_tray") {
     "//ui/base",
     "//ui/menus",
     "//ui/native_theme",
+    "//brave/components/brave_vpn/common/buildflags",
   ]
   if (!enable_resource_allowlist_generation) {
     deps += [ "//chrome:packed_resources" ]

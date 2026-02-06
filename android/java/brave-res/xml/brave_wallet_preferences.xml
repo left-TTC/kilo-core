@@ -31,6 +31,16 @@
         android:title="@string/brave_wallet_networks_title"
         android:summary="@string/brave_wallet_networks_summary" />
 
+    <org.chromium.chrome.browser.kilo.KiloEditPreference
+        android:key="wns_IPFS_proxy"
+        android:title="WNS IPFS proxy"
+        android:summary="web3 name service's IPFS proxy set" />
+
+    <org.chromium.chrome.browser.kilo.KiloRPCEditPreference
+        android:key="wns_RPC_proxy"
+        android:title="WNS RPC proxy"
+        android:summary="web3 name service's RPC proxy set" />
+
     <org.chromium.components.browser_ui.settings.ChromeSwitchPreference
         android:key="web3_notifications_switch"
         android:title="@string/brave_wallet_show_web3_notifications"

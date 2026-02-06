@@ -19,8 +19,8 @@ export function WidgetsPanel() {
   const vpnActions = useVpnActions()
 
   const showStats = useNewTabState((s) => s.showShieldsStats)
-  const talkFeatureEnabled = useNewTabState((s) => s.talkFeatureEnabled)
-  const showTalkWidget = useNewTabState((s) => s.showTalkWidget)
+//   const talkFeatureEnabled = useNewTabState((s) => s.talkFeatureEnabled)
+//   const showTalkWidget = useNewTabState((s) => s.showTalkWidget)
   const rewardsFeatureEnabled = useRewardsState((s) => s.rewardsFeatureEnabled)
   const showRewardsWidget = useRewardsState((s) => s.showRewardsWidget)
   const vpnFeatureEnabled = useVpnState((s) => s.vpnFeatureEnabled)
@@ -64,7 +64,7 @@ export function WidgetsPanel() {
             />
           </div>
       }
-      {
+      {/* {
         talkFeatureEnabled &&
           <div className='control-row'>
             <label>{getString(S.NEW_TAB_SHOW_TALK_WIDGET_LABEL)}</label>
@@ -76,7 +76,7 @@ export function WidgetsPanel() {
               }}
             />
           </div>
-      }
+      } */}
     </div>
   )
 }

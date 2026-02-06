@@ -10,7 +10,7 @@ import { initLocale } from 'brave-ui'
 import { BrowserRouter } from 'react-router-dom'
 
 // assets
-import faveiconUrl from '../assets/svg-icons/brave-icon.svg'
+import faveiconUrl from '../assets/svg-icons/kilo-128.svg'
 
 // utils
 import { loadTimeData } from '../../common/loadTimeData'

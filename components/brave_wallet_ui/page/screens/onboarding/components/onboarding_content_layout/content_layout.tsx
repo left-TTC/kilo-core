@@ -25,11 +25,13 @@ import {
   WalletTitle,
   StaticBackground,
   BackgroundGradientBottomLayer,
-  BraveIcon,
+//   BraveIcon,
   HeaderWrapper,
   TitleSection,
   BackButtonWrapper,
 } from './content_layout.style'
+
+import kilo from "../../../../../assets/svg-icons/kilo-128.svg"
 
 interface Props {
   title?: string | React.ReactNode
@@ -91,7 +93,8 @@ export const OnboardingContentLayout = ({
           gap='10px'
           justifyContent='flex-start'
         >
-          <BraveIcon />
+          {/* <BraveIcon /> */}
+          <img src={kilo} style={{width:"15px"}} />
           <WalletTitle>{getLocale('braveWalletTitle')}</WalletTitle>
         </Row>
       </TitleSection>

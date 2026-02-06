@@ -3,6 +3,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+// fanmocheng
+
 #include "brave/browser/extensions/api/settings_private/brave_prefs_util.h"
 
 #include "brave/browser/ui/tabs/brave_tab_prefs.h"
@@ -293,14 +295,20 @@ const PrefsUtil::TypedPrefMap& BravePrefsUtil::GetAllowlistedKeys() {
   (*s_brave_allowlist)[request_otr::kRequestOTRActionOption] =
       settings_api::PrefType::kNumber;
 
-  (*s_brave_allowlist)[decentralized_dns::kUnstoppableDomainsResolveMethod] =
-      settings_api::PrefType::kNumber;
-  (*s_brave_allowlist)[decentralized_dns::kENSResolveMethod] =
-      settings_api::PrefType::kNumber;
-  (*s_brave_allowlist)[decentralized_dns::kEnsOffchainResolveMethod] =
-      settings_api::PrefType::kNumber;
-  (*s_brave_allowlist)[decentralized_dns::kSnsResolveMethod] =
-      settings_api::PrefType::kNumber;
+    (*s_brave_allowlist)[decentralized_dns::kUnstoppableDomainsResolveMethod] =
+        settings_api::PrefType::kNumber;
+    (*s_brave_allowlist)[decentralized_dns::kENSResolveMethod] =
+        settings_api::PrefType::kNumber;
+    (*s_brave_allowlist)[decentralized_dns::kEnsOffchainResolveMethod] =
+        settings_api::PrefType::kNumber;
+    (*s_brave_allowlist)[decentralized_dns::kSnsResolveMethod] =
+        settings_api::PrefType::kNumber;
+    (*s_brave_allowlist)[decentralized_dns::kWnsResolveMethod] =
+        settings_api::PrefType::kNumber;
+    (*s_brave_allowlist)[decentralized_dns::kWnsResolveMethodGateWay] =
+        settings_api::PrefType::kString;
+    (*s_brave_allowlist)[decentralized_dns::kWnsRpcResolveWay] =
+        settings_api::PrefType::kString;
 
   // Media router pref
   (*s_brave_allowlist)[kEnableMediaRouterOnRestart] =

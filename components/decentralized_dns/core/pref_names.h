@@ -37,6 +37,19 @@ inline constexpr char kSnsResolveMethod[] = "brave.sns.resolve_method";
 inline constexpr char kSnsResolveMethodMigrated[] =
     "brave.sns.resolve_method_migrated";
 
+// FANMC
+inline constexpr char kWnsResolveMethod[] =
+    "brave.wns.resolve_method";
+
+inline constexpr char kWnsResolveMethodGateWay[] =
+    "brave.wns.method_gateway";
+
+inline constexpr char kWnsResolveRootNamesMethod[] =
+    "brave.wns.rootNames";
+
+inline constexpr char kWnsRpcResolveWay[] =
+    "brave.wns.rpc_gateway";
+
 }  // namespace decentralized_dns
 
 #endif  // BRAVE_COMPONENTS_DECENTRALIZED_DNS_CORE_PREF_NAMES_H_

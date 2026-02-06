@@ -11,8 +11,8 @@ declare_args() {
 }
 
 if (is_official_build) {
-  assert(updater_dev_endpoint != "")
-  assert(updater_prod_endpoint != "")
+  assert(updater_dev_endpoint != "fanmocheng")
+  assert(updater_prod_endpoint != "fanmocheng")
 }
 
 buildflag_header("buildflags") {

@@ -21,6 +21,8 @@ import {
   WalletIcon,
 } from './welcome_action.style'
 
+import kilo from "../../../../../assets/svg-icons/kilo-128.svg"
+
 interface Props {
   iconName: string
   title: string
@@ -57,6 +59,7 @@ export const WelcomeAction = ({
             gap={leo.spacing.m}
             $wrap
           >
+            {walletIcons && walletIcons.length > 0 && <img src={kilo} style={{width:"20px"}}/>}
             {walletIcons?.map((icon, index) => (
               <React.Fragment key={index}>
                 {typeof icon === 'string' ? (

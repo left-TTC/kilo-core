@@ -57,8 +57,33 @@ public class FilterListServiceFactory {
         return CoreImpl.getInstance().acquireNativeHandle(nativeHandle).toMessagePipeHandle();
     }
 
+    public String getIpfsGateWay() {
+        return FilterListServiceFactoryJni.get().GetGateway();
+    }
+
+    public void setIpfsGateWay(String value) {
+        FilterListServiceFactoryJni.get().SetGateway(value);
+    }
+
+    public String getRPCGateWay() {
+        return FilterListServiceFactoryJni.get().GetRPCGateway();
+    }
+
+    public void setRPCGateWay(String value) {
+        FilterListServiceFactoryJni.get().SetRPCGateway(value);
+    }
+
+    public String[] getRootNames() {
+        return FilterListServiceFactoryJni.get().GetRootNames();
+    }
+
     @NativeMethods
     interface Natives {
         long getInterfaceToFilterListService(Profile profile);
+        String GetGateway();
+        void SetGateway(String value);
+        String GetRPCGateway();
+        void SetRPCGateway(String value);
+        String[] GetRootNames();
     }
 }

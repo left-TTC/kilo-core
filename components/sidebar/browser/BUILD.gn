@@ -5,8 +5,11 @@
 
 import("//brave/components/ai_chat/core/common/buildflags/buildflags.gni")
 import("//build/config/ui.gni")
+import("//brave/build/kilo_feature.gni")
 
 assert(toolkit_views)
+
+
 
 static_library("browser") {
   sources = [
@@ -44,6 +47,12 @@ static_library("browser") {
   }
 }
 
+config("enable_talk_check_config") {
+    if (enable_browser_brave_talk) {
+        defines = [ "ENABLE_TALK_ORIGIN" ]
+    }
+}
+
 source_set("unit_tests") {
   testonly = true
   sources = [ "sidebar_service_unittest.cc" ]
@@ -69,4 +78,6 @@ source_set("unit_tests") {
   if (enable_ai_chat) {
     deps += [ "//brave/components/ai_chat/core/common" ]
   }
+
+  configs += [ ":enable_talk_check_config" ]
 }

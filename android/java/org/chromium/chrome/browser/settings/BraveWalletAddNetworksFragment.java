@@ -33,10 +33,12 @@ import org.chromium.mojo.bindings.ConnectionErrorHandler;
 import org.chromium.mojo.system.MojoException;
 import org.chromium.url.mojom.Url;
 
+import org.chromium.components.browser_ui.settings.SettingsFragment;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 
-public class BraveWalletAddNetworksFragment extends Fragment implements ConnectionErrorHandler {
+public class BraveWalletAddNetworksFragment extends Fragment implements ConnectionErrorHandler, SettingsFragment {
 
     /**
      * Listener implemented by {@link BraveWalletNetworksPreferenceFragment} used to notify the
@@ -48,6 +50,12 @@ public class BraveWalletAddNetworksFragment extends Fragment implements Connecti
 
         /** Modifies an existing network. */
         void modifyNetwork(String chainId, boolean activeNetwork);
+    }
+
+    @Override
+    public int getAnimationType() {
+        // 返回 Chromium SettingsFragment 定义的 int 常量
+        return 1;
     }
 
     private JsonRpcService mJsonRpcService;

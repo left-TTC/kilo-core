@@ -20,6 +20,8 @@ constexpr std::string GetBraveVersionNumberForDisplay() {
 
 std::string GetBraveChromiumVersionNumber();
 
+std::string GetBraveKiloVersion();
+
 }  // namespace version_info
 
 #endif  // BRAVE_COMPONENTS_VERSION_INFO_VERSION_INFO_H_

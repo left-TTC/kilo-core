@@ -199,7 +199,7 @@ provideStrings({
     + 'and that I am solely responsible for any associated funds, assets, '
     + 'or accounts, and for taking any appropriate action to '
     + 'secure, protect, and back up my wallet. '
-    + 'I understand that Brave cannot access my wallet or '
+    + 'I understand that Kilo cannot access my wallet or '
     + 'reverse transactions on my behalf, '
     + 'and that my recovery phrase is the ONLY way to '
     + 'regain access in the event of a '
@@ -250,7 +250,7 @@ provideStrings({
     'Import your seed phrase from an existing wallet',
   braveWalletImportWalletTypeHardwareWalletTitle: 'Hardware wallet',
   braveWalletImportWalletTypeHardwareWalletDescription:
-    'Connect your hardware wallet with Brave',
+    'Connect your hardware wallet with Kilo',
 
   // Onboarding - Backup Wallet - Intro
   braveWalletOnboardingRecoveryPhraseBackupIntroTitle:

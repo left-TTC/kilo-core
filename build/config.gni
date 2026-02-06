@@ -17,7 +17,7 @@ declare_args() {
   sparkle_eddsa_private_key = ""
   sparkle_eddsa_public_key = ""
 
-  brave_product_name = "brave"
+  brave_product_name = "kilo"
   brave_exe = ""
   brave_version_major = ""
   brave_version_minor = ""
@@ -41,6 +41,7 @@ declare_args() {
   # Enables brave/tools/redirect_cc target, replaces brave/chromium_src
   # overrides with empty ones to make //base buildable for redirect_cc.
   android_aab_to_apk = false
+
 }
 
 if (target_os == "win") {

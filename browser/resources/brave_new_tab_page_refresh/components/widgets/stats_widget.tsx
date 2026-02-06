@@ -48,19 +48,19 @@ export function StatsWidget() {
       <div className='data'>
         <div>
           <div className='ads-blocked'>
-            <div className='value'>
+            <div className='value' style={{color:"#FF6B6B"}}>
               {stats && adsBlockedFormatter.format(stats.adsBlocked)}
             </div>
             {getString(S.NEW_TAB_STATS_ADS_BLOCKED_TEXT)}
           </div>
           <div className='bandwidth-saved'>
-            <div className='value'>
+            <div className='value' style={{color:"#4CAF50"}}>
               {stats && renderUnits(formatBandwidth(stats.bandwidthSavedBytes))}
             </div>
             {getString(S.NEW_TAB_STATS_BANDWIDTH_SAVED_TEXT)}
           </div>
           <div className='time-saved'>
-            <div className='value'>
+            <div className='value' style={{color:"#FFC107"}}>
               {stats &&
                 renderUnits(formatTimeSaved(getTimeSaved(stats.adsBlocked)))}
             </div>

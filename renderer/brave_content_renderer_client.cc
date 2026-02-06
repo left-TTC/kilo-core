@@ -59,10 +59,11 @@
 
 #if BUILDFLAG(ENABLE_BRAVE_VPN)
 #include "brave/components/brave_vpn/common/brave_vpn_utils.h"
+#endif  // BUILDFLAG(ENABLE_BRAVE_VPN)
+
 #if BUILDFLAG(IS_ANDROID)
 #include "brave/components/brave_mobile_subscription/renderer/android/subscription_render_frame_observer.h"
 #endif  // BUILDFLAG(IS_ANDROID)
-#endif  // BUILDFLAG(ENABLE_BRAVE_VPN)
 
 #if BUILDFLAG(ENABLE_WIDEVINE)
 #include "media/base/key_system_info.h"

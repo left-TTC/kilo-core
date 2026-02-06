@@ -4,9 +4,10 @@
 # You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import("//brave/components/brave_origin/buildflags/buildflags.gni")
+import("//brave/build/kilo_feature.gni")
 
 declare_args() {
-  enable_ai_chat = !is_brave_origin_branded
+  enable_ai_chat = enable_browser_brave_leo
 }
 
 declare_args() {

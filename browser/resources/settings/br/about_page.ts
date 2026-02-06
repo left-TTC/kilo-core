@@ -29,13 +29,13 @@ const extractVersions = (versionElement: Element) => {
   return { braveVersion, build, chromiumVersion }
 }
 
-const buildBraveVersionLink = (braveVersion: string, build: string) => {
+const buildBraveVersionLink = () => {
   const wrapper = document.createElement('a')
   wrapper.setAttribute('id', 'release-notes')
   wrapper.setAttribute('target', '_blank')
   wrapper.setAttribute('rel', 'noopener noreferrer')
-  wrapper.setAttribute('href', 'https://brave.com/latest/')
-  wrapper.textContent = `Brave ${braveVersion} ${build}`
+  wrapper.setAttribute('href', 'https://github.com/left-TTC/kilo-browser/release/')
+  wrapper.textContent = `Kilo v0.0.1`
 
   return wrapper
 }
@@ -65,14 +65,14 @@ RegisterPolymerTemplateModifications({
       wrapper.setAttribute('id', 'release-notes')
       wrapper.setAttribute('target', '_blank')
       wrapper.setAttribute('rel', 'noopener noreferrer')
-      wrapper.setAttribute('href', 'https://brave.com/latest/')
+      wrapper.setAttribute('href', 'https://github.com/left-TTC/kilo-browser/release/')
 
       const parent = version.parentNode
       parent?.replaceChild(wrapper, version)
       wrapper.appendChild(version)
 
-      const { braveVersion, build, chromiumVersion } = extractVersions(version)
-      const braveVersionLink = buildBraveVersionLink(braveVersion, build)
+      const { chromiumVersion } = extractVersions(version)
+      const braveVersionLink = buildBraveVersionLink()
       version.parentNode?.replaceChild(braveVersionLink, version)
 
       const chromiumVersionElement = buildChromiumVersionElement(chromiumVersion)
@@ -83,15 +83,7 @@ RegisterPolymerTemplateModifications({
     const updateStatusMessageLink =
       templateContent.querySelector('#updateStatusMessage a')
     if (updateStatusMessageLink) {
-      // <if expr="is_win">
-      updateStatusMessageLink.href =
-        'https://support.brave.app/hc/en-us/articles/360042816611-Why-isn-t-Brave-updating-automatically-on-Windows-'
-      // </if>
-
-      // <if expr="not is_win">
-        updateStatusMessageLink.href =
-          'https://community.brave.app?p=update_error'
-      // </if>
+      updateStatusMessageLink.style.display = 'none'
     }
   }
 })

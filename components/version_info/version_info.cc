@@ -17,4 +17,8 @@ std::string GetBraveChromiumVersionNumber() {
   return constants::kBraveChromiumVersion;
 }
 
+std::string GetBraveKiloVersion() {
+    return constants::kKiloBrowserVersion;
+}
+
 }  // namespace version_info

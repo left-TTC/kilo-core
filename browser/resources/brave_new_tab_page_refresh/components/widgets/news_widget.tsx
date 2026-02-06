@@ -7,6 +7,7 @@ import * as React from 'react'
 import Button from '@brave/leo/react/button'
 import Icon from '@brave/leo/react/icon'
 
+
 import * as mojom from 'gen/brave/components/brave_news/common/brave_news.mojom.m.js'
 import { useBraveNews } from '../../../../../components/brave_news/browser/resources/shared/Context'
 import { getTranslatedChannelName } from '../../../../../components/brave_news/browser/resources/shared/channel'
@@ -39,7 +40,7 @@ export function NewsWidget() {
       <div className='title'>
         {getString(S.NEW_TAB_NEWS_WIDGET_TITLE)}
       </div>
-      {braveNews.isOptInPrefEnabled ? <PeekItem /> : <OptIn />}
+      {!braveNews.isOptInPrefEnabled ? <PeekItem /> : <OptIn />}
     </div>
   )
 }
@@ -92,7 +93,7 @@ function OptIn() {
   return (
     <div className='opt-in'>
       <div className='graphic' />
-      <div className='text'>
+      <div className='text' style={{marginLeft:"5px"}}>
         {getString(S.BRAVE_NEWS_INTRO_TITLE)}
       </div>
       <div className='actions'>

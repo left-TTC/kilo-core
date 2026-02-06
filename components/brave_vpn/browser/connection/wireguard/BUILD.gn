@@ -5,7 +5,10 @@
 
 import("//brave/components/brave_vpn/common/buildflags/buildflags.gni")
 
-assert(enable_brave_vpn)
+import("//brave/build/kilo_feature.gni")     
+if(enable_browser_brave_VPN){
+    assert(enable_brave_vpn)
+}            
 assert(!is_android)
 
 source_set("wireguard") {

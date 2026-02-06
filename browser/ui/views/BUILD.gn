@@ -3,6 +3,14 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this file,
 # You can obtain one at https://mozilla.org/MPL/2.0/.
 
+import("//brave/build/kilo_feature.gni")
+
+config("enable_talk_check_config") {
+    if (enable_browser_brave_talk) {
+        defines = [ "ENABLE_TALK_ORGIN" ]
+    }
+}
+
 source_set("layout_provider") {
   sources = [
     "brave_layout_provider.cc",
@@ -20,4 +28,6 @@ source_set("layout_provider") {
     "//base",
     "//ui/views",
   ]
+
+  configs += [ ":enable_talk_check_config" ]
 }

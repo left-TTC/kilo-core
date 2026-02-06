@@ -499,6 +499,9 @@ brave_java_sources = [
   "../../brave/android/java/org/chromium/chrome/browser/widget/quickactionsearchandbookmark/promo/SearchWidgetPromoPanel.java",
   "../../brave/android/java/org/chromium/chrome/browser/widget/quickactionsearchandbookmark/utils/BraveSearchWidgetUtils.java",
   "../../brave/android/java/org/chromium/chrome/browser/youtube_script_injector/BraveYouTubeScriptInjectorNativeHelper.java",
+  "../../brave/android/java/org/chromium/chrome/browser/kilo/KiloFeatures.java",
+  "../../brave/android/java/org/chromium/chrome/browser/kilo/KiloEditPreference.java",
+  "../../brave/android/java/org/chromium/chrome/browser/kilo/KiloRPCEditPreference.java",
 ]
 
 brave_java_sources += brave_ads_java_sources

@@ -23,7 +23,6 @@ import {
 } from '../../../../../components/shared/style'
 
 const softwareWalletIcons = [
-  'brave-icon-release-color',
   'phantom-color',
   'metamask-color',
   'coinbase-color',

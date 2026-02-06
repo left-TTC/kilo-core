@@ -5,9 +5,13 @@
 
 import("//brave/build/config.gni")
 import("//build/toolchain/win/midl.gni")
+import("//brave/build/kilo_feature.gni")  
 
 assert(is_win)
-assert(enable_brave_vpn)
+   
+if(enable_browser_brave_VPN){
+    assert(enable_brave_vpn)
+}            
 
 midl("brave_wireguard_manager_idl") {
   sources = [ "brave_wireguard_manager_idl.idl" ]

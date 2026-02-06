@@ -50,6 +50,14 @@ brave_browser_net_sources = [
   "//brave/browser/net/search_ads_header_network_delegate_helper.h",
   "//brave/browser/net/url_context.cc",
   "//brave/browser/net/url_context.h",
+  "//brave/browser/net/brave_web3_service.cc",
+  "//brave/browser/net/brave_web3_service.h",
+  "//brave/browser/net/brave_web3_libsodium.cc",
+  "//brave/browser/net/brave_web3_libsodium.h",
+  "//brave/browser/net/brave_web3_rpc.cc",
+  "//brave/browser/net/brave_web3_rpc.h",
+  "//brave/browser/net/brave_web3_task.cc",
+  "//brave/browser/net/brave_web3_task.h",
 ]
 
 brave_browser_net_deps = [

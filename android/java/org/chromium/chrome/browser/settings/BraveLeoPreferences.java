@@ -36,6 +36,8 @@ import org.chromium.components.browser_ui.settings.ChromeBasePreference;
 import org.chromium.components.browser_ui.settings.ChromeSwitchPreference;
 import org.chromium.components.browser_ui.settings.SettingsUtils;
 
+import org.chromium.chrome.browser.kilo.KiloFeatures;
+
 public class BraveLeoPreferences extends BravePreferenceFragment
         implements Preference.OnPreferenceChangeListener {
     private static final String TAG = "BraveLeoPreferences";
@@ -82,7 +84,7 @@ public class BraveLeoPreferences extends BravePreferenceFragment
             mHistory = (ChromeSwitchPreference) history;
             mHistory.setOnPreferenceChangeListener(this);
             mHistory.setChecked(BraveLeoPrefUtils.getIsHistoryEnabled());
-            mHistory.setVisible(ChromeFeatureList.isEnabled(BraveFeatureList.AI_CHAT_HISTORY));
+            mHistory.setVisible(ChromeFeatureList.isEnabled(BraveFeatureList.AI_CHAT_HISTORY) && KiloFeatures.isBraveAIEnable());
         }
 
         BraveLeoUtils.verifySubscription(

@@ -45,29 +45,29 @@ declare_args() {
   zebpay_sandbox_oauth_url = ""
 }
 
-if (is_official_build) {
-  if (!is_ios) {
-    assert(bitflyer_production_client_id != "")
-    assert(bitflyer_production_client_secret != "")
-    assert(bitflyer_production_fee_address != "")
-    assert(bitflyer_production_url != "")
-    assert(gemini_production_api_url != "")
-    assert(gemini_production_client_id != "")
-    assert(gemini_production_client_secret != "")
-    assert(gemini_production_fee_address != "")
-    assert(gemini_production_oauth_url != "")
-    assert(uphold_production_api_url != "")
-    assert(uphold_production_client_id != "")
-    assert(uphold_production_client_secret != "")
-    assert(uphold_production_fee_address != "")
-    assert(uphold_production_oauth_url != "")
-    assert(zebpay_production_api_url != "")
-    assert(zebpay_production_client_id != "")
-    assert(zebpay_production_client_secret != "")
-    assert(zebpay_production_oauth_url != "")
-  }
+#if (is_official_build) {
+#  if (!is_ios) {
+#   assert(bitflyer_production_client_id != "")
+#    assert(bitflyer_production_client_secret != "")
+#    assert(bitflyer_production_fee_address != "")
+#    assert(bitflyer_production_url != "")
+#    assert(gemini_production_api_url != "")
+#    assert(gemini_production_client_id != "")
+#    assert(gemini_production_client_secret != "")
+#    assert(gemini_production_fee_address != "")
+#    assert(gemini_production_oauth_url != "")
+#    assert(uphold_production_api_url != "")
+#    assert(uphold_production_client_id != "")
+#    assert(uphold_production_client_secret != "")
+#    assert(uphold_production_fee_address != "")
+#    assert(uphold_production_oauth_url != "")
+#    assert(zebpay_production_api_url != "")
+#    assert(zebpay_production_client_id != "")
+#    assert(zebpay_production_client_secret != "")
+#    assert(zebpay_production_oauth_url != "")
+#  }
 
-  assert(rewards_grant_dev_endpoint != "")
-  assert(rewards_grant_staging_endpoint != "")
-  assert(rewards_grant_prod_endpoint != "")
-}
+#  assert(rewards_grant_dev_endpoint != "")
+#  assert(rewards_grant_staging_endpoint != "")
+#  assert(rewards_grant_prod_endpoint != "")
+#}

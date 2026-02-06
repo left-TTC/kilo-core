@@ -15,8 +15,8 @@ import { BackgroundState, BackgroundActions, BraveBackground } from './backgroun
 // the current collection of Brave backgrounds.
 const defaultBraveBackground: BraveBackground = {
   imageUrl: 'dylan-malval_sea-min.webp',
-  author: 'Dylan Malval',
-  link: 'https://www.instagram.com/vass_captures/'
+  author: 'ZiXvan Liao',
+  link: 'https://github.com/xuanBOSS/'
 }
 
 export function createBackgroundHandler(

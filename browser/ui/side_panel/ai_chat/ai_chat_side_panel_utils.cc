@@ -8,6 +8,7 @@
 #include "base/notimplemented.h"
 #include "brave/components/ai_chat/core/common/features.h"
 #include "chrome/browser/profiles/profile.h"
+#include "brave/components/ai_chat/core/common/buildflags/buildflags.h"
 
 namespace ai_chat {
 
@@ -23,8 +24,11 @@ void ClosePanel(content::WebContents* web_contents) {
 #endif
 
 bool ShouldSidePanelBeGlobal(Profile* profile) {
-  return profile->IsAIChatAgent() ||
-         ai_chat::features::IsAIChatGlobalSidePanelEverywhereEnabled();
+    #if BUILDFLAG(ENABLE_AI_CHAT)
+        return ai_chat::features::IsAIChatGlobalSidePanelEverywhereEnabled();
+    #else
+        return false;
+    #endif
 }
 
 }  // namespace ai_chat

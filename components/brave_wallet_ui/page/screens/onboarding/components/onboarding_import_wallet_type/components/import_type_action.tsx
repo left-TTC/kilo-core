@@ -5,6 +5,9 @@
 
 import * as React from 'react'
 
+import kilo from "../../../../../../assets/svg-icons/kilo-128.svg"
+import { getLocale } from '../../../../../../../common/locale'
+
 // styles
 import {
   ActionIcon,
@@ -42,6 +45,7 @@ export const ImportTypeAction = ({
       <Subtitle>{description}</Subtitle>
       <VerticalSpace space='10px' />
       <IconsWrapper>
+        {title===getLocale('braveWalletImportWalletTypeHotWalletTitle') && <img src={kilo} style={{width:"18px"}} />}
         {icons.map((icon) =>
           typeof icon === 'string' ? (
             <ActionIcon
