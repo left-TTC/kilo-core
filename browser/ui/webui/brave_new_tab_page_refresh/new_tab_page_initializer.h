@@ -11,6 +11,9 @@
 #include "base/memory/raw_ptr.h"
 #include "base/memory/raw_ref.h"
 
+#include "chrome/browser/browser_process.h"
+#include "brave/components/decentralized_dns/core/utils.h"
+
 namespace content {
 class WebUI;
 class WebUIDataSource;

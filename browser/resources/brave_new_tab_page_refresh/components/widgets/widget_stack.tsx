@@ -18,8 +18,9 @@ import { StatsWidget } from './stats_widget'
 import { NewsWidget } from './news_widget'
 
 import { style } from './widget_stack.style'
+import { WnsWidget } from './wns_widget'
 
-type TabName = 'rewards' | 'talk' | 'vpn' | 'stats' | 'news'
+type TabName = 'rewards' | 'talk' | 'vpn' | 'stats' | 'news' | 'wns'
 
 interface Props {
   name: string
@@ -47,6 +48,7 @@ export function WidgetStack(props: Props) {
         case 'vpn': return vpnFeatureEnabled && showVpnWidget
         case 'stats': return showShieldsStats
         case 'news': return newsFeatureEnabled && showNews
+        case 'wns': return true
       }
     })
   }, [
@@ -82,6 +84,7 @@ export function WidgetStack(props: Props) {
       case 'vpn': return <Icon name='product-vpn' />
       case 'stats': return <Icon name='bar-chart' />
       case 'news': return <Icon name='product-brave-news' />
+      case 'wns': return ;
     }
   }
 
@@ -92,6 +95,7 @@ export function WidgetStack(props: Props) {
       case 'vpn': return <VpnWidget />
       case 'stats': return <StatsWidget />
       case 'news': return <NewsWidget />
+      case 'wns': return <WnsWidget />
     }
   }
 
@@ -131,7 +135,9 @@ function tabNameIdentity(tabName: TabName): TabName {
     case 'talk':
     case 'stats':
     case 'news':
+    case 'wns':
       return tabName
+    
   }
 }
 

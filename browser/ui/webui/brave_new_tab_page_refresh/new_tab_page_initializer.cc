@@ -172,6 +172,17 @@ void NewTabPageInitializer::AddLoadTimeValues() {
                       !prefs->GetBoolean(kBraveTalkDisabledByPolicy));
 
   source_->AddInteger("maxCustomTopSites", ntp_tiles::kMaxNumCustomLinks);
+
+    PrefService* pref = g_browser_process->local_state();
+
+    bool if_kilo = false;
+
+    if (pref) {
+        const auto roots = decentralized_dns::GetWnsRootNames(pref);
+        if_kilo = !roots.empty();
+    }
+
+    source_->AddBoolean("ifKilo", if_kilo);
 }
 
 void NewTabPageInitializer::AddStrings() {

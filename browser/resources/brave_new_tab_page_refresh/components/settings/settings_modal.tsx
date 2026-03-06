@@ -11,7 +11,7 @@ import NavigationItem from '@brave/leo/react/navigationItem'
 
 import { useBraveNews } from '../../../../../components/brave_news/browser/resources/shared/Context'
 
-import { useNewTabState } from '../../context/new_tab_context'
+// import { useNewTabState } from '../../context/new_tab_context'
 import { useSearchState } from '../../context/search_context'
 import { BackgroundPanel } from './background_panel'
 import { SearchPanel } from './search_panel'
@@ -26,7 +26,6 @@ export type SettingsView =
   'background' |
   'search' |
   'top-sites' |
-  'news' |
   'clock' |
   'widgets'
 
@@ -39,26 +38,26 @@ interface Props {
 export function SettingsModal(props: Props) {
   const braveNews = useBraveNews()
   const searchFeatureEnabled = useSearchState((s) => s.searchFeatureEnabled)
-  const newsFeatureEnabled = useNewTabState((s) => s.newsFeatureEnabled)
+//   const newsFeatureEnabled = useNewTabState((s) => s.newsFeatureEnabled)
 
   const [currentView, setCurrentView] =
       React.useState<SettingsView>(props.initialView || 'background')
 
   React.useEffect(() => {
     if (props.isOpen) {
-      if (props.initialView === 'news') {
-        braveNews.setCustomizePage('news')
-        setCurrentView('background')
-      } else {
+    //   if (props.initialView === 'news') {
+    //     braveNews.setCustomizePage('news')
+    //     setCurrentView('background')
+    //   } else {
         setCurrentView(props.initialView ?? 'background')
-      }
+    //   }
     }
   }, [props.isOpen, props.initialView])
 
   function shouldShowView(view: SettingsView) {
     switch (view) {
       case 'search': return searchFeatureEnabled
-      case 'news': return newsFeatureEnabled
+    //   case 'news': return newsFeatureEnabled
       default: return true
     }
   }
@@ -71,7 +70,6 @@ export function SettingsModal(props: Props) {
       case 'background': return <BackgroundPanel />
       case 'search': return <SearchPanel />
       case 'top-sites': return <TopSitesPanel />
-      case 'news': return null
       case 'clock': return <ClockPanel />
       case 'widgets': return <WidgetsPanel />
     }
@@ -82,7 +80,7 @@ export function SettingsModal(props: Props) {
       case 'background': return getString(S.NEW_TAB_BACKGROUND_SETTINGS_TITLE)
       case 'search': return getString(S.NEW_TAB_SEARCH_SETTINGS_TITLE)
       case 'top-sites': return getString(S.NEW_TAB_TOP_SITES_SETTINGS_TITLE)
-      case 'news': return getString(S.BRAVE_NEWS_SETTINGS_TITLE)
+    //   case 'news': return getString(S.BRAVE_NEWS_SETTINGS_TITLE)
       case 'clock': return getString(S.NEW_TAB_CLOCK_SETTINGS_TITLE)
       case 'widgets': return getString(S.NEW_TAB_WIDGET_SETTINGS_TITLE)
     }
@@ -93,7 +91,7 @@ export function SettingsModal(props: Props) {
       case 'background': return <Icon name='image' />
       case 'search': return <Icon name='search' />
       case 'top-sites': return <Icon name='window-content' />
-      case 'news': return <Icon name='product-brave-news' />
+    //   case 'news': return <Icon name='product-brave-news' />
       case 'clock': return <Icon name='clock' />
       case 'widgets': return <Icon name='browser-ntp-widget' />
     }
@@ -107,11 +105,11 @@ export function SettingsModal(props: Props) {
       <NavigationItem
         isCurrent={view === currentView}
         onClick={() => {
-          if (view === 'news') {
-            braveNews.setCustomizePage('news')
-          } else {
+        //   if (view === 'news') {
+        //     braveNews.setCustomizePage('news')
+        //   } else {
             setCurrentView(view)
-          }
+        //   }
         }}
       >
         {getNavItemIcon(view)}
@@ -137,7 +135,7 @@ export function SettingsModal(props: Props) {
               {renderNavItem('background')}
               {renderNavItem('search')}
               {renderNavItem('top-sites')}
-              {renderNavItem('news')}
+              {/* {renderNavItem('news')} */}
               {renderNavItem('clock')}
               {renderNavItem('widgets')}
             </Navigation>
